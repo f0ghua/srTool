@@ -233,10 +233,13 @@ qint32 AppHeaderFile::save(QString fileName)
 
         }
 
-        tempStr.clear();
-        tempStr = Utility::formatByteArray(pba);
-        outFile->write(tempStr.toLatin1());
-        outFile->write("\n\n");
+        if (sectionMapping[i].flag != PROC_FLAG_NONE)
+        {
+            tempStr.clear();
+            tempStr = Utility::formatByteArray(pba);
+            outFile->write(tempStr.toLatin1());
+            outFile->write("\n\n");
+        }
     }
 
     outFile->close();
