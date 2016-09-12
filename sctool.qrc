@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="menuOpen">images/tb_open16x16.png</file>
+    </qresource>
+</RCC>
