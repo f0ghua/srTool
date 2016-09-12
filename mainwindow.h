@@ -31,6 +31,7 @@ private slots:
     void on_m_pbSaveBin_clicked();
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
+    void on_actionReLoad_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -46,6 +47,8 @@ private:
     int getLineNumberByCursor(QPlainTextEdit *pte);
     void saveAppHeaderFile();
     void saveBinaryFile();
+    int loadAppHeaderFile();
+    int updateAppHeaderFile();
 };
 
 #endif // MAINWINDOW_H

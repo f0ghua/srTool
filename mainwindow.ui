@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>srTool</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_11">
@@ -25,7 +25,7 @@
      <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>24</number>
+     <number>9</number>
     </property>
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1074,6 +1074,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionReLoad"/>
    <addaction name="actionLoad_File"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
@@ -1098,6 +1099,18 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionReLoad">
+   <property name="icon">
+    <iconset resource="sctool.qrc">
+     <normaloff>:/menuReload</normaloff>:/menuReload</iconset>
+   </property>
+   <property name="text">
+    <string>ReLoad App Header File</string>
+   </property>
+   <property name="toolTip">
+    <string>ReLoad App Header File</string>
    </property>
   </action>
  </widget>

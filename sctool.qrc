@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file alias="menuOpen">images/tb_open16x16.png</file>
+        <file alias="menuReload">images/reload_16x16.png</file>
     </qresource>
 </RCC>

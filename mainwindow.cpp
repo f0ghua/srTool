@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     if (gb != NULL)
     {
         m_listEcuName = gb->findChildren<QLineEdit *>();
-#if 1
+#if 0
         for (int i = 0; i < m_listEcuName.count(); i++)
         {
             qDebug() << m_listEcuName.at(i)->objectName();
@@ -80,9 +80,30 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < list.count(); i++)
         list.at(i)->setValidator(pReg);
 
+    connect(ui->m_pteASLInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteASLInfoLineAction);
+    connect(ui->m_pteSignerInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteSignerInfoLineAction);
+    connect(ui->m_pteSignature, &QPlainTextEdit::cursorPositionChanged, this, &pteSignatureLineAction);
+
+    loadAppHeaderFile();
+
+    //ui->m_pbSave->setCheckable(true);
+    //connect(ui->m_pbSave, &QPushButton::toggled, ui->m_gbEcuId, &QGroupBox::setVisible);
+
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+
+    if (m_pSrecordFile) delete m_pSrecordFile;
+    if (m_pAppHeaderFile) delete m_pAppHeaderFile;
+}
+
+int MainWindow::loadAppHeaderFile()
+{
     m_pAppHeaderFile = new AppHeaderFile();
     m_pAppHeaderFile->load(FILENAME_APP_SIGNED_HEADER);
-    qDebug() << m_pAppHeaderFile->m_ecuName.toHex();
+    //qDebug() << m_pAppHeaderFile->m_ecuName.toHex();
     //qDebug() << m_pAppHeaderFile->m_msgDigest.toHex();
 
 #define LISTWIDGET_SETTEXT(l, a) \
@@ -99,31 +120,65 @@ MainWindow::MainWindow(QWidget *parent) :
     LISTWIDGET_SETTEXT(m_listApNbid, m_pAppHeaderFile->m_appNbid)
     LISTWIDGET_SETTEXT(m_listMsgDig, m_pAppHeaderFile->m_msgDigest)
 
+    ui->m_pteASLInfo->clear();
     ui->m_pteASLInfo->appendPlainText(
         Utility::formatByteArray(&m_pAppHeaderFile->m_aslInfo)
         );
+    ui->m_pteSignerInfo->clear();
     ui->m_pteSignerInfo->appendPlainText(
         Utility::formatByteArray(&m_pAppHeaderFile->m_signerInfo)
         );
+    ui->m_pteSignature->clear();
     ui->m_pteSignature->appendPlainText(
         Utility::formatByteArray(&m_pAppHeaderFile->m_signature)
         );
 
-    connect(ui->m_pteASLInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteASLInfoLineAction);
-    connect(ui->m_pteSignerInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteSignerInfoLineAction);
-    connect(ui->m_pteSignature, &QPlainTextEdit::cursorPositionChanged, this, &pteSignatureLineAction);
-
-    //ui->m_pbSave->setCheckable(true);
-    //connect(ui->m_pbSave, &QPushButton::toggled, ui->m_gbEcuId, &QGroupBox::setVisible);
-
+    return 0;
 }
 
-MainWindow::~MainWindow()
+int MainWindow::updateAppHeaderFile()
 {
-    delete ui;
+    bool ok;
+    QByteArray ba;
+    QString s;
 
-    if (m_pSrecordFile) delete m_pSrecordFile;
-    if (m_pAppHeaderFile) delete m_pAppHeaderFile;
+#define LISTWIDGET_TEXTSET(l, a) \
+    ba.clear(); \
+    for (int i = 0; i < (l).count(); i++) \
+    { \
+        ba.append((char)(l).at(i)->text().toUInt(&ok, 16)); \
+    } \
+    (a) = ba;
+
+    LISTWIDGET_TEXTSET(m_listModuleId, m_pAppHeaderFile->m_moduleId)
+    LISTWIDGET_TEXTSET(m_listBcId, m_pAppHeaderFile->m_bcid)
+    LISTWIDGET_TEXTSET(m_listEcuName, m_pAppHeaderFile->m_ecuName)
+    LISTWIDGET_TEXTSET(m_listEcuId, m_pAppHeaderFile->m_ecuId)
+    LISTWIDGET_TEXTSET(m_listApNbid, m_pAppHeaderFile->m_appNbid)
+    LISTWIDGET_TEXTSET(m_listMsgDig, m_pAppHeaderFile->m_msgDigest)
+
+    s = ui->m_pteASLInfo->toPlainText().simplified().replace(" ", "");
+    ba = QByteArray::fromHex(s.toLatin1());
+    if ((ba.count()-2)%8 == 0)
+    {
+        m_pAppHeaderFile->m_aslInfo = ba;
+    }
+
+    s = ui->m_pteSignerInfo->toPlainText().simplified().replace(" ", "");
+    ba = QByteArray::fromHex(s.toLatin1());
+    if (ba.count() == SIZE_SINFO)
+    {
+        m_pAppHeaderFile->m_signerInfo = ba;
+    }
+
+    s = ui->m_pteSignature->toPlainText().simplified().replace(" ", "");
+    ba = QByteArray::fromHex(s.toLatin1());
+    if (ba.count() == SIZE_SIGNATURE)
+    {
+        m_pAppHeaderFile->m_signature = ba;
+    }
+
+    return 0;
 }
 
 int MainWindow::getLineNumberByCursor(QPlainTextEdit *pte)
@@ -142,24 +197,24 @@ int MainWindow::getLineNumberByCursor(QPlainTextEdit *pte)
 void MainWindow::pteASLInfoLineAction()
 {
     int line = getLineNumberByCursor(ui->m_pteASLInfo);
-    statusBar()->showMessage(tr("line %1 selected").arg(line), 0);
+    statusBar()->showMessage(tr("line %1 selected").arg(line), 2000);
 }
 
 void MainWindow::pteSignerInfoLineAction()
 {
     int line = getLineNumberByCursor(ui->m_pteSignerInfo);
-    statusBar()->showMessage(tr("line %1 selected").arg(line), 0);
+    statusBar()->showMessage(tr("line %1 selected").arg(line), 2000);
 }
 
 void MainWindow::pteSignatureLineAction()
 {
     int line = getLineNumberByCursor(ui->m_pteSignature);
-    statusBar()->showMessage(tr("line %1 selected").arg(line), 0);
+    statusBar()->showMessage(tr("line %1 selected").arg(line), 2000);
 }
 
 void MainWindow::saveBinaryFile()
 {
-    qDebug() << "m_pSrecordFile = " << m_pSrecordFile;
+    //qDebug() << "m_pSrecordFile = " << m_pSrecordFile;
     if (!m_pSrecordFile)
     {
         QMessageBox message(
@@ -177,7 +232,7 @@ void MainWindow::saveBinaryFile()
     if (fileName.isEmpty())
         return;
 
-    qDebug() << fileName;
+    //qDebug() << fileName;
 
     QFile *outFile = new QFile(fileName);
     if (!outFile->open(QIODevice::WriteOnly))
@@ -209,7 +264,7 @@ void MainWindow::saveBinaryFile()
     outFile->close();
     delete outFile;
 
-    statusBar()->showMessage(tr("Binary file %1 saved success.").arg(fileName), 0);
+    statusBar()->showMessage(tr("Binary file %1 saved success.").arg(fileName), 2000);
 }
 
 void MainWindow::saveAppHeaderFile()
@@ -224,11 +279,11 @@ void MainWindow::saveAppHeaderFile()
 
     if (m_pSrecordFile == NULL)
     {
-        statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 0);
+        statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
         return;
     }
 
-    statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 0);
+    statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
 }
 
 void MainWindow::on_actionLoad_File_triggered()
@@ -243,15 +298,17 @@ void MainWindow::on_m_pbClose_clicked()
 
 void MainWindow::on_m_pbSaveHdr_clicked()
 {
+    updateAppHeaderFile();
+
     if (m_pAppHeaderFile)
     {
         if (m_pAppHeaderFile->save(FILENAME_APP_SIGNED_HEADER) == 0)
         {
-            statusBar()->showMessage(tr("File %1 saved success.").arg(FILENAME_APP_SIGNED_HEADER), 0);
+            statusBar()->showMessage(tr("File %1 saved success.").arg(FILENAME_APP_SIGNED_HEADER), 2000);
             return;
         }
     }
-    statusBar()->showMessage(tr("File %1 saved failure.").arg(FILENAME_APP_SIGNED_HEADER), 0);
+    statusBar()->showMessage(tr("File %1 saved failure.").arg(FILENAME_APP_SIGNED_HEADER), 2000);
 }
 
 void MainWindow::on_m_pbSaveBin_clicked()
@@ -269,8 +326,13 @@ void MainWindow::on_actionAbout_triggered()
     QMessageBox message(
         QMessageBox::Information,
         "About",
-        "Motorola S-record to Binary Utility v1.0",
+        "Motorola S-record to Binary Utility Version 1.0.01",
         QMessageBox::Ok,
         NULL);
     message.exec();
+}
+
+void MainWindow::on_actionReLoad_triggered()
+{
+    loadAppHeaderFile();
 }

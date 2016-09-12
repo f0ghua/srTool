@@ -179,7 +179,6 @@ qint32 AppHeaderFile::save(QString fileName)
 {
     QString tempStr;
     QFile *outFile = new QFile(fileName);
-    QString nodesOutput, msgOutput, commentsOutput, valuesOutput;
 
     if (!outFile->open(QIODevice::WriteOnly | QIODevice::Text))
     {
