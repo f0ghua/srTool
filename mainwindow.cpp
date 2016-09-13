@@ -136,11 +136,45 @@ int MainWindow::loadAppHeaderFile()
     return 0;
 }
 
+void MainWindow::messageBoxAlert(QString s)
+{
+    QMessageBox message(
+        QMessageBox::Warning,
+        "Warning", s,
+        QMessageBox::Ok,
+        NULL);
+    message.exec();
+}
+
 int MainWindow::updateAppHeaderFile()
 {
     bool ok;
-    QByteArray ba;
+    QByteArray ba, baAslInfo, baSignerInfo, baSignature;
     QString s;
+
+    s = ui->m_pteASLInfo->toPlainText().simplified().replace(" ", "");
+    baAslInfo = QByteArray::fromHex(s.toLatin1());
+    if ((baAslInfo.count()-2)%8 != 0)
+    {
+        messageBoxAlert("App SW Location Info input length is wrong!");
+        return -1;
+    }
+
+    s = ui->m_pteSignerInfo->toPlainText().simplified().replace(" ", "");
+    baSignerInfo = QByteArray::fromHex(s.toLatin1());
+    if (baSignerInfo.count() != SIZE_SINFO)
+    {
+        messageBoxAlert("Signer Info input length is wrong!");
+        return -1;
+    }
+
+    s = ui->m_pteSignature->toPlainText().simplified().replace(" ", "");
+    baSignature = QByteArray::fromHex(s.toLatin1());
+    if (baSignature.count() != SIZE_SIGNATURE)
+    {
+        messageBoxAlert("Signature input length is wrong!");
+        return -1;
+    }
 
 #define LISTWIDGET_TEXTSET(l, a) \
     ba.clear(); \
@@ -157,26 +191,9 @@ int MainWindow::updateAppHeaderFile()
     LISTWIDGET_TEXTSET(m_listApNbid, m_pAppHeaderFile->m_appNbid)
     LISTWIDGET_TEXTSET(m_listMsgDig, m_pAppHeaderFile->m_msgDigest)
 
-    s = ui->m_pteASLInfo->toPlainText().simplified().replace(" ", "");
-    ba = QByteArray::fromHex(s.toLatin1());
-    if ((ba.count()-2)%8 == 0)
-    {
-        m_pAppHeaderFile->m_aslInfo = ba;
-    }
-
-    s = ui->m_pteSignerInfo->toPlainText().simplified().replace(" ", "");
-    ba = QByteArray::fromHex(s.toLatin1());
-    if (ba.count() == SIZE_SINFO)
-    {
-        m_pAppHeaderFile->m_signerInfo = ba;
-    }
-
-    s = ui->m_pteSignature->toPlainText().simplified().replace(" ", "");
-    ba = QByteArray::fromHex(s.toLatin1());
-    if (ba.count() == SIZE_SIGNATURE)
-    {
-        m_pAppHeaderFile->m_signature = ba;
-    }
+    m_pAppHeaderFile->m_aslInfo = baAslInfo;
+    m_pAppHeaderFile->m_signerInfo = baSignerInfo;
+    m_pAppHeaderFile->m_signature = baSignature;
 
     return 0;
 }

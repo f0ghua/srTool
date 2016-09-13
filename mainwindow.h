@@ -49,6 +49,7 @@ private:
     void saveBinaryFile();
     int loadAppHeaderFile();
     int updateAppHeaderFile();
+    void messageBoxAlert(QString s);
 };
 
 #endif // MAINWINDOW_H
