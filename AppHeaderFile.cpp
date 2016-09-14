@@ -79,7 +79,7 @@ qint32 AppHeaderFile::load(QString fileName)
             }
         }
 
-        line.replace(" ", "");
+        line.remove(" ");
 #ifndef F_NO_DEBUG
         qDebug() << "line: <" << line << ">";
 #endif
@@ -186,7 +186,7 @@ qint32 AppHeaderFile::save(QString fileName)
         return -1;
     }
 
-    for (int i = 0;
+    for (quint32 i = 0;
         i < sizeof(sectionMapping)/sizeof(sectionMapping[0]);
         i++)
     {

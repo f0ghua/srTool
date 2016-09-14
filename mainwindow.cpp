@@ -152,7 +152,7 @@ int MainWindow::updateAppHeaderFile()
     QByteArray ba, baAslInfo, baSignerInfo, baSignature;
     QString s;
 
-    s = ui->m_pteASLInfo->toPlainText().simplified().replace(" ", "");
+    s = ui->m_pteASLInfo->toPlainText().simplified().remove(" ");
     baAslInfo = QByteArray::fromHex(s.toLatin1());
     if ((baAslInfo.count()-2)%8 != 0)
     {
@@ -160,7 +160,7 @@ int MainWindow::updateAppHeaderFile()
         return -1;
     }
 
-    s = ui->m_pteSignerInfo->toPlainText().simplified().replace(" ", "");
+    s = ui->m_pteSignerInfo->toPlainText().simplified().remove(" ");
     baSignerInfo = QByteArray::fromHex(s.toLatin1());
     if (baSignerInfo.count() != SIZE_SINFO)
     {
@@ -168,7 +168,7 @@ int MainWindow::updateAppHeaderFile()
         return -1;
     }
 
-    s = ui->m_pteSignature->toPlainText().simplified().replace(" ", "");
+    s = ui->m_pteSignature->toPlainText().simplified().remove(" ");
     baSignature = QByteArray::fromHex(s.toLatin1());
     if (baSignature.count() != SIZE_SIGNATURE)
     {
