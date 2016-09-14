@@ -9,6 +9,8 @@
 #include <QTextBlock>
 #include <QRegExp>
 
+#define F_NO_DEBUG
+
 #ifndef F_NO_DEBUG
 #include <QTime>
 #include <QDebug>
@@ -279,6 +281,10 @@ void MainWindow::saveBinaryFile()
     for (auto d : m_pSrecordFile->m_dataRecords)
     {
         QByteArray &ba = d.binData;
+
+#ifndef F_NO_DEBUG
+        qDebug() << ba.count() << ":" << ba.toHex();
+#endif
         outFile->write(ba);
     }
 
