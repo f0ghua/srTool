@@ -70,7 +70,7 @@ bool SrecFile::parseLine(QString &line, int lineNumber)
     }
 
     QString hexStr(line.mid(2));
-    // ba = count(1) + address + data + checksum(2)
+    // ba = count(1) + address + data + checksum(1)
     QByteArray ba = QByteArray::fromHex(hexStr.toLatin1());
 
     if (ba.count() < 1) return false;
@@ -127,7 +127,10 @@ bool SrecFile::parseLine(QString &line, int lineNumber)
                 sd.address += ba.at(i)&0xFF;
             }
             sd.count = ba.count();
-            sd.binData = ba.mid(1+sd.addressLen, ba.count()-2-sd.addressLen+1);
+#define BIN_COUNT_LENGTH 1
+#define BIN_CKSUM_LENGTH 1
+            sd.binData = ba.mid(1+sd.addressLen,
+                ba.count()-BIN_COUNT_LENGTH-sd.addressLen-BIN_CKSUM_LENGTH);
 
             m_dataRecords.insert(lineNumber, sd);
             break;
