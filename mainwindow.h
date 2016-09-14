@@ -22,7 +22,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void pteASLInfoLineAction();
+    //void pteASLInfoLineAction();
     void pteSignerInfoLineAction();
     void pteSignatureLineAction();
     void on_actionLoad_File_triggered();
@@ -32,6 +32,8 @@ private slots:
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
     void on_actionReLoad_triggered();
+
+    void on_m_cbASLInfoSub0_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;

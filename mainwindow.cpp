@@ -80,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < list.count(); i++)
         list.at(i)->setValidator(pReg);
 
-    connect(ui->m_pteASLInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteASLInfoLineAction);
+    //connect(ui->m_pteASLInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteASLInfoLineAction);
     connect(ui->m_pteSignerInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteSignerInfoLineAction);
     connect(ui->m_pteSignature, &QPlainTextEdit::cursorPositionChanged, this, &pteSignatureLineAction);
 
@@ -120,10 +120,12 @@ int MainWindow::loadAppHeaderFile()
     LISTWIDGET_SETTEXT(m_listApNbid, m_pAppHeaderFile->m_appNbid)
     LISTWIDGET_SETTEXT(m_listMsgDig, m_pAppHeaderFile->m_msgDigest)
 
+/*
     ui->m_pteASLInfo->clear();
     ui->m_pteASLInfo->appendPlainText(
         Utility::formatByteArray(&m_pAppHeaderFile->m_aslInfo)
         );
+*/
     ui->m_pteSignerInfo->clear();
     ui->m_pteSignerInfo->appendPlainText(
         Utility::formatByteArray(&m_pAppHeaderFile->m_signerInfo)
@@ -151,7 +153,7 @@ int MainWindow::updateAppHeaderFile()
     bool ok;
     QByteArray ba, baAslInfo, baSignerInfo, baSignature;
     QString s;
-
+/*
     s = ui->m_pteASLInfo->toPlainText().simplified().remove(" ");
     baAslInfo = QByteArray::fromHex(s.toLatin1());
     if ((baAslInfo.count()-2)%8 != 0)
@@ -159,7 +161,7 @@ int MainWindow::updateAppHeaderFile()
         messageBoxAlert("App SW Location Info input length is wrong!");
         return -1;
     }
-
+*/
     s = ui->m_pteSignerInfo->toPlainText().simplified().remove(" ");
     baSignerInfo = QByteArray::fromHex(s.toLatin1());
     if (baSignerInfo.count() != SIZE_SINFO)
@@ -211,11 +213,13 @@ int MainWindow::getLineNumberByCursor(QPlainTextEdit *pte)
     return nTextline+1;
 }
 
+/*
 void MainWindow::pteASLInfoLineAction()
 {
     int line = getLineNumberByCursor(ui->m_pteASLInfo);
     statusBar()->showMessage(tr("line %1 selected").arg(line), 2000);
 }
+*/
 
 void MainWindow::pteSignerInfoLineAction()
 {
@@ -352,4 +356,20 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_actionReLoad_triggered()
 {
     loadAppHeaderFile();
+}
+
+void MainWindow::on_m_cbASLInfoSub0_currentIndexChanged(int index)
+{
+	switch(index)
+	{
+		case 0:
+			ui->m_wgASLInfoSub1->setVisible(true);
+			ui->m_wgASLInfoSub2->setVisible(false);
+			break;
+		case 1:
+			ui->m_wgASLInfoSub1->setVisible(true);
+			ui->m_wgASLInfoSub2->setVisible(true);
+			break;
+	}
+
 }
