@@ -5,9 +5,11 @@
 #include <QtWidgets>
 
 #include "SrecFile.h"
-#include "AppHeaderFile.h"
+#include "HeaderFile.h"
 
 #define FILENAME_APP_SIGNED_HEADER      "App_Signed_Header.txt"
+#define FILENAME_CAL1_SIGNED_HEADER     "Cal1_Signed_Header.txt"
+#define FILENAME_CAL2_SIGNED_HEADER     "Cal2_Signed_Header.txt"
 
 namespace Ui {
 class MainWindow;
@@ -22,9 +24,6 @@ public:
     ~MainWindow();
 
 private slots:
-    //void pteASLInfoLineAction();
-    void pteSignerInfoLineAction();
-    void pteSignatureLineAction();
     void on_actionLoad_File_triggered();
     void on_m_pbClose_clicked();
     void on_m_pbSaveHdr_clicked();
@@ -37,20 +36,32 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    AppHeaderFile *m_pAppHeaderFile;
+    HeaderFile *m_pAppHeaderFile;
+    HeaderFile *m_pCal1HeaderFile;
+    HeaderFile *m_pCal2HeaderFile;
     SrecFile *m_pSrecordFile;
-    QList<QLineEdit *> m_listModuleId;
-    QList<QLineEdit *> m_listBcId;
-    QList<QLineEdit *> m_listEcuName;
-    QList<QLineEdit *> m_listEcuId;
-    QList<QLineEdit *> m_listApNbid;
-    QList<QLineEdit *> m_listMsgDig;
+    QList<QLineEdit *> m_listAppDLS;
+    QList<QLineEdit *> m_listAppHPN;
+    QList<QLineEdit *> m_listAppBCID;
+    QList<QLineEdit *> m_listAppNBID;
+    QList<QLineEdit *> m_listAppASLInfo;
+    QList<QLineEdit *> m_listAppASLInfoSub1;
+    QList<QLineEdit *> m_listAppASLInfoSub2;
+    QList<QLineEdit *> m_listCal1DLS;
+    QList<QLineEdit *> m_listCal1HPN;
+    QList<QLineEdit *> m_listCal1CCID;
+    QList<QLineEdit *> m_listCal2DLS;
+    QList<QLineEdit *> m_listCal2HPN;
+    QList<QLineEdit *> m_listCal2CCID;
 
-    int getLineNumberByCursor(QPlainTextEdit *pte);
-    void saveAppHeaderFile();
+    void loadS19File(SrecFile *pSrecordFile);
     void saveBinaryFile();
     int loadAppHeaderFile();
+    int loadCal1HeaderFile();
+    int loadCal2HeaderFile();
     int updateAppHeaderFile();
+    int updateCal1HeaderFile();
+    int updateCal2HeaderFile();
     void messageBoxAlert(QString s);
 };
 

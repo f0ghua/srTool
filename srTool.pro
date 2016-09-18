@@ -5,23 +5,23 @@
 #-------------------------------------------------
 
 QT       += core gui
+CONFIG   += console
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = srTool
 TEMPLATE = app
 
-
 SOURCES += main.cpp\
         mainwindow.cpp \
     SrecFile.cpp \
-    AppHeaderFile.cpp \
-    Utility.cpp
+    Utility.cpp \
+    HeaderFile.cpp
 
 HEADERS  += mainwindow.h \
     SrecFile.h \
-    AppHeaderFile.h \
-    Utility.h
+    Utility.h \
+    HeaderFile.h
 
 FORMS    += mainwindow.ui
 

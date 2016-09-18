@@ -75,7 +75,7 @@ public:
         return QString::number(input, 16).toUpper().rightJustified(16,'0');
     }
 
-    static QString formatByteArray(QByteArray *pba)
+    static QString formatByteArray(const QByteArray *pba)
     {
         QString tempStr;
 

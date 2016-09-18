@@ -9,12 +9,27 @@
 #include <QTextBlock>
 #include <QRegExp>
 
-#define F_NO_DEBUG
+//#define F_NO_DEBUG
 
 #ifndef F_NO_DEBUG
 #include <QTime>
 #include <QDebug>
 #endif
+
+#define LISTWIDGET_SETTEXT(l, a) \
+    if ((l).count() == (a)->count()) \
+    { \
+        for (int i = 0; i < (l).count(); i++) \
+            (l).at(i)->setText(Utility::formatHexNumber((a)->at(i)&0xFF)); \
+    }
+
+#define LISTWIDGET_TEXTSET(l, a) \
+    ba.clear(); \
+    for (int i = 0; i < (l).count(); i++) \
+    { \
+        ba.append((char)(l).at(i)->text().toUInt(&ok, 16)); \
+    } \
+    if (a) (*a) = ba;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,54 +41,80 @@ MainWindow::MainWindow(QWidget *parent) :
     const QRect ag = QApplication::desktop()->availableGeometry(this);
     qint32 w = ag.width() * 1 / 2;
     resize(w , w * 3 / 4);
-    //move(ag.width() / 8, 0);
-
-    //ui->m_pteSignature->document()->setMaximumBlockCount(30000);
-
-    //QWidget *pWin = QApplication::activeWindow;
 
     QGroupBox *gb;
-
-    gb = this->findChild<QGroupBox *>("m_gbModuleId");
+    gb = this->findChild<QGroupBox *>("m_gbAppDLS");
     if (gb != NULL)
     {
-        m_listModuleId = gb->findChildren<QLineEdit *>();
+        m_listAppDLS = gb->findChildren<QLineEdit *>();
     }
-
-    gb = this->findChild<QGroupBox *>("m_gbBcId");
+    gb = this->findChild<QGroupBox *>("m_gbAppHPN");
     if (gb != NULL)
     {
-        m_listBcId = gb->findChildren<QLineEdit *>();
+        m_listAppHPN = gb->findChildren<QLineEdit *>();
     }
-
-    gb = this->findChild<QGroupBox *>("m_gbEcuName");
+    gb = this->findChild<QGroupBox *>("m_gbAppBCID");
     if (gb != NULL)
     {
-        m_listEcuName = gb->findChildren<QLineEdit *>();
-#if 0
-        for (int i = 0; i < m_listEcuName.count(); i++)
+        m_listAppBCID = gb->findChildren<QLineEdit *>();
+    }
+    gb = this->findChild<QGroupBox *>("m_gbAppNBID");
+    if (gb != NULL)
+    {
+        m_listAppNBID = gb->findChildren<QLineEdit *>();
+    }
+    gb = this->findChild<QGroupBox *>("m_gbAppASLInfo");
+    if (gb != NULL)
+    {
+        m_listAppASLInfo = gb->findChildren<QLineEdit *>();
+#ifndef F_NO_DEBUG
+        for (int i = 0; i < m_listAppASLInfo.count(); i++)
         {
-            qDebug() << m_listEcuName.at(i)->objectName();
+            qDebug() << m_listAppASLInfo.at(i)->objectName();
         }
 #endif
     }
-
-    gb = this->findChild<QGroupBox *>("m_gbEcuId");
-    if (gb != NULL)
+    QWidget *wd;
+    wd = this->findChild<QWidget *>("m_wgASLInfoSub1");
+    if (wd != NULL)
     {
-        m_listEcuId = gb->findChildren<QLineEdit *>();
+        m_listAppASLInfoSub1 = wd->findChildren<QLineEdit *>();
+    }
+    wd = this->findChild<QWidget *>("m_wgASLInfoSub2");
+    if (wd != NULL)
+    {
+        m_listAppASLInfoSub2 = wd->findChildren<QLineEdit *>();
     }
 
-    gb = this->findChild<QGroupBox *>("m_gbApNbid");
+    gb = this->findChild<QGroupBox *>("m_gbCal1DLS");
     if (gb != NULL)
     {
-        m_listApNbid = gb->findChildren<QLineEdit *>();
+        m_listCal1DLS = gb->findChildren<QLineEdit *>();
     }
-
-    gb = this->findChild<QGroupBox *>("m_gbMsgDig");
+    gb = this->findChild<QGroupBox *>("m_gbCal1HPN");
     if (gb != NULL)
     {
-        m_listMsgDig = gb->findChildren<QLineEdit *>();
+        m_listCal1HPN = gb->findChildren<QLineEdit *>();
+    }
+    gb = this->findChild<QGroupBox *>("m_gbCal1CCID");
+    if (gb != NULL)
+    {
+        m_listCal1CCID = gb->findChildren<QLineEdit *>();
+    }
+    gb = this->findChild<QGroupBox *>("m_gbCal2DLS");
+    if (gb != NULL)
+    {
+        m_listCal2DLS = gb->findChildren<QLineEdit *>();
+    }
+    gb = this->findChild<QGroupBox *>("m_gbCal2HPN");
+    if (gb != NULL)
+    {
+        m_listCal2HPN = gb->findChildren<QLineEdit *>();
+    }
+    gb = this->findChild<QGroupBox *>("m_gbCal2CCID");
+    if (gb != NULL)
+    {
+        m_listCal2CCID = gb->findChildren<QLineEdit *>();
     }
 
     QRegExp rx("^[0-9a-fA-F]{2}$");
@@ -82,14 +123,7 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < list.count(); i++)
         list.at(i)->setValidator(pReg);
 
-    //connect(ui->m_pteASLInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteASLInfoLineAction);
-    connect(ui->m_pteSignerInfo, &QPlainTextEdit::cursorPositionChanged, this, &pteSignerInfoLineAction);
-    connect(ui->m_pteSignature, &QPlainTextEdit::cursorPositionChanged, this, &pteSignatureLineAction);
-
-    loadAppHeaderFile();
-
-    //ui->m_pbSave->setCheckable(true);
-    //connect(ui->m_pbSave, &QPushButton::toggled, ui->m_gbEcuId, &QGroupBox::setVisible);
+    on_actionReLoad_triggered();
 
 }
 
@@ -99,43 +133,138 @@ MainWindow::~MainWindow()
 
     if (m_pSrecordFile) delete m_pSrecordFile;
     if (m_pAppHeaderFile) delete m_pAppHeaderFile;
+    if (m_pCal1HeaderFile) delete m_pCal1HeaderFile;
 }
 
 int MainWindow::loadAppHeaderFile()
 {
-    m_pAppHeaderFile = new AppHeaderFile();
-    m_pAppHeaderFile->load(FILENAME_APP_SIGNED_HEADER);
-    //qDebug() << m_pAppHeaderFile->m_ecuName.toHex();
-    //qDebug() << m_pAppHeaderFile->m_msgDigest.toHex();
-
-#define LISTWIDGET_SETTEXT(l, a) \
-    if ((l).count() == (a).count()) \
-    { \
-        for (int i = 0; i < (l).count(); i++) \
-            (l).at(i)->setText(Utility::formatHexNumber((a).at(i)&0xFF)); \
+    m_pAppHeaderFile = new HeaderFile();
+    if (m_pAppHeaderFile->load(FILENAME_APP_SIGNED_HEADER) == -1) {
+    	messageBoxAlert("load app signed header file failure.");
+    	return -1;
     }
 
-    LISTWIDGET_SETTEXT(m_listModuleId, m_pAppHeaderFile->m_moduleId)
-    LISTWIDGET_SETTEXT(m_listBcId, m_pAppHeaderFile->m_bcid)
-    LISTWIDGET_SETTEXT(m_listEcuName, m_pAppHeaderFile->m_ecuName)
-    LISTWIDGET_SETTEXT(m_listEcuId, m_pAppHeaderFile->m_ecuId)
-    LISTWIDGET_SETTEXT(m_listApNbid, m_pAppHeaderFile->m_appNbid)
-    LISTWIDGET_SETTEXT(m_listMsgDig, m_pAppHeaderFile->m_msgDigest)
+#if 0//ndef F_NO_DEBUG
+    for (int i = 0; i < m_pAppHeaderFile->m_sigSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pAppHeaderFile->m_sigSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pAppHeaderFile->m_sigSections[i].data));
+    }
 
-/*
-    ui->m_pteASLInfo->clear();
-    ui->m_pteASLInfo->appendPlainText(
-        Utility::formatByteArray(&m_pAppHeaderFile->m_aslInfo)
-        );
-*/
-    ui->m_pteSignerInfo->clear();
-    ui->m_pteSignerInfo->appendPlainText(
-        Utility::formatByteArray(&m_pAppHeaderFile->m_signerInfo)
-        );
-    ui->m_pteSignature->clear();
-    ui->m_pteSignature->appendPlainText(
-        Utility::formatByteArray(&m_pAppHeaderFile->m_signature)
-        );
+    for (int i = 0; i < m_pAppHeaderFile->m_infSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pAppHeaderFile->m_infSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pAppHeaderFile->m_infSections[i].data));
+    }
+#endif
+
+    QString s;
+    if (!m_pAppHeaderFile->appHeaderIsValid(s))
+    {
+    	messageBoxAlert(s);
+    }
+
+    LISTWIDGET_SETTEXT(m_listAppDLS,
+    	m_pAppHeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_SETTEXT(m_listAppHPN,
+    	m_pAppHeaderFile->getSectionDataByName("$Hex Part Number$"))
+    LISTWIDGET_SETTEXT(m_listAppBCID,
+    	m_pAppHeaderFile->getSectionDataByName("$BCID$"))
+    LISTWIDGET_SETTEXT(m_listAppNBID,
+    	m_pAppHeaderFile->getSectionDataByName("$App-NBID$"))
+
+    QByteArray *pBa=
+    	m_pAppHeaderFile->getSectionDataByName("$App SW Location Info$");
+    if (!pBa->isEmpty() && (pBa->at(0) == 0) &&
+    	(pBa->at(1) == 1 || pBa->at(1) == 2)) {
+    	if (pBa->at(1) == 1) {
+    		ui->m_cbASLInfoSub0->setCurrentIndex(0);
+    		on_m_cbASLInfoSub0_currentIndexChanged(0);
+    	}
+    	else {
+    		ui->m_cbASLInfoSub0->setCurrentIndex(1);
+    		on_m_cbASLInfoSub0_currentIndexChanged(1);
+    	}
+
+        for (int i = 0; i < 8*pBa->at(1); i++)
+            m_listAppASLInfo.at(i)->setText(Utility::formatHexNumber(pBa->at(i+2)&0xFF));
+    }
+
+    return 0;
+}
+
+int MainWindow::loadCal1HeaderFile()
+{
+    m_pCal1HeaderFile = new HeaderFile();
+    if (m_pCal1HeaderFile->load(FILENAME_CAL1_SIGNED_HEADER) == -1) {
+    	messageBoxAlert("Load cal1 signed header file failure.");
+    	return -1;
+    }
+
+#if 0//ndef F_NO_DEBUG
+    for (int i = 0; i < m_pCal1HeaderFile->m_sigSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pCal1HeaderFile->m_sigSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pCal1HeaderFile->m_sigSections[i].data));
+    }
+
+    for (int i = 0; i < m_pCal1HeaderFile->m_infSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pCal1HeaderFile->m_infSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pCal1HeaderFile->m_infSections[i].data));
+    }
+#endif
+
+    QString s;
+    if (!m_pCal1HeaderFile->calHeaderIsValid(s))
+    {
+    	messageBoxAlert(s);
+    }
+
+    LISTWIDGET_SETTEXT(m_listCal1DLS,
+    	m_pCal1HeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_SETTEXT(m_listCal1HPN,
+    	m_pCal1HeaderFile->getSectionDataByName("$Hex Part Number$"))
+    LISTWIDGET_SETTEXT(m_listCal1CCID,
+    	m_pCal1HeaderFile->getSectionDataByName("$CCID$"))
+
+    return 0;
+}
+
+int MainWindow::loadCal2HeaderFile()
+{
+    m_pCal2HeaderFile = new HeaderFile();
+    if (m_pCal2HeaderFile->load(FILENAME_CAL2_SIGNED_HEADER) == -1) {
+    	messageBoxAlert("Load cal2 signed header file failure.");
+    	return -1;
+    }
+
+#ifndef F_NO_DEBUG
+    for (int i = 0; i < m_pCal2HeaderFile->m_sigSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pCal2HeaderFile->m_sigSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pCal2HeaderFile->m_sigSections[i].data));
+    }
+
+    for (int i = 0; i < m_pCal2HeaderFile->m_infSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pCal2HeaderFile->m_infSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pCal2HeaderFile->m_infSections[i].data));
+    }
+#endif
+
+    QString s;
+    if (!m_pCal2HeaderFile->calHeaderIsValid(s))
+    {
+    	messageBoxAlert(s);
+    }
+
+    LISTWIDGET_SETTEXT(m_listCal2DLS,
+    	m_pCal2HeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_SETTEXT(m_listCal2HPN,
+    	m_pCal2HeaderFile->getSectionDataByName("$Hex Part Number$"))
+    LISTWIDGET_SETTEXT(m_listCal2CCID,
+    	m_pCal2HeaderFile->getSectionDataByName("$CCID$"))
 
     return 0;
 }
@@ -153,86 +282,72 @@ void MainWindow::messageBoxAlert(QString s)
 int MainWindow::updateAppHeaderFile()
 {
     bool ok;
-    QByteArray ba, baAslInfo, baSignerInfo, baSignature;
-    QString s;
-/*
-    s = ui->m_pteASLInfo->toPlainText().simplified().remove(" ");
-    baAslInfo = QByteArray::fromHex(s.toLatin1());
-    if ((baAslInfo.count()-2)%8 != 0)
-    {
-        messageBoxAlert("App SW Location Info input length is wrong!");
-        return -1;
-    }
-*/
-    s = ui->m_pteSignerInfo->toPlainText().simplified().remove(" ");
-    baSignerInfo = QByteArray::fromHex(s.toLatin1());
-    if (baSignerInfo.count() != SIZE_SINFO)
-    {
-        messageBoxAlert("Signer Info input length is wrong!");
-        return -1;
-    }
+    QByteArray ba;
 
-    s = ui->m_pteSignature->toPlainText().simplified().remove(" ");
-    baSignature = QByteArray::fromHex(s.toLatin1());
-    if (baSignature.count() != SIZE_SIGNATURE)
+    LISTWIDGET_TEXTSET(m_listAppDLS,
+    	m_pAppHeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_TEXTSET(m_listAppHPN,
+    	m_pAppHeaderFile->getSectionDataByName("$Hex Part Number$"));
+    LISTWIDGET_TEXTSET(m_listAppBCID,
+    	m_pAppHeaderFile->getSectionDataByName("$BCID$"));
+    LISTWIDGET_TEXTSET(m_listAppNBID,
+    	m_pAppHeaderFile->getSectionDataByName("$App-NBID$"));
+    LISTWIDGET_TEXTSET(m_listAppBCID,
+    	m_pAppHeaderFile->getSectionDataByName("@BCID@"));
+    LISTWIDGET_TEXTSET(m_listAppNBID,
+    	m_pAppHeaderFile->getSectionDataByName("@App-NBID@"));
+
+    int idx = ui->m_cbASLInfoSub0->currentIndex();
+    int len = (idx+1)*8;
+    ba.clear();
+    ba.append((char)0);
+    ba.append((char)(idx+1));
+    for (int i = 0; i < len; i++)
     {
-        messageBoxAlert("Signature input length is wrong!");
-        return -1;
+    	ba.append((char)m_listAppASLInfo.at(i)->text().toUInt(&ok, 16));
     }
 
-#define LISTWIDGET_TEXTSET(l, a) \
-    ba.clear(); \
-    for (int i = 0; i < (l).count(); i++) \
-    { \
-        ba.append((char)(l).at(i)->text().toUInt(&ok, 16)); \
-    } \
-    (a) = ba;
-
-    LISTWIDGET_TEXTSET(m_listModuleId, m_pAppHeaderFile->m_moduleId)
-    LISTWIDGET_TEXTSET(m_listBcId, m_pAppHeaderFile->m_bcid)
-    LISTWIDGET_TEXTSET(m_listEcuName, m_pAppHeaderFile->m_ecuName)
-    LISTWIDGET_TEXTSET(m_listEcuId, m_pAppHeaderFile->m_ecuId)
-    LISTWIDGET_TEXTSET(m_listApNbid, m_pAppHeaderFile->m_appNbid)
-    LISTWIDGET_TEXTSET(m_listMsgDig, m_pAppHeaderFile->m_msgDigest)
-
-    m_pAppHeaderFile->m_aslInfo = baAslInfo;
-    m_pAppHeaderFile->m_signerInfo = baSignerInfo;
-    m_pAppHeaderFile->m_signature = baSignature;
+    QByteArray *pBa;
+    pBa = m_pAppHeaderFile->getSectionDataByName("$App SW Location Info$");
+    if (pBa) *pBa = ba;
+    pBa = m_pAppHeaderFile->getSectionDataByName("@App SW Location Info@");
+    if (pBa) *pBa = ba;
 
     return 0;
 }
 
-int MainWindow::getLineNumberByCursor(QPlainTextEdit *pte)
+int MainWindow::updateCal1HeaderFile()
 {
-    //当前光标
-    QTextCursor tc = pte->textCursor();
-    QTextLayout *pLayout = tc.block().layout();
+    bool ok;
+    QByteArray ba;
 
-    //当前光标在本BLOCK内的相对位置
-    int nCurpos = tc.position() - tc.block().position();
-    int nTextline = pLayout->lineForTextPosition(nCurpos).lineNumber() + tc.block().firstLineNumber();
+    LISTWIDGET_TEXTSET(m_listCal1DLS,
+    	m_pCal1HeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_TEXTSET(m_listCal1HPN,
+    	m_pCal1HeaderFile->getSectionDataByName("$Hex Part Number$"));
+    LISTWIDGET_TEXTSET(m_listCal1CCID,
+    	m_pCal1HeaderFile->getSectionDataByName("$CCID$"));
+    LISTWIDGET_TEXTSET(m_listCal1CCID,
+    	m_pCal1HeaderFile->getSectionDataByName("@CCID@"));
 
-    return nTextline+1;
+    return 0;
 }
 
-/*
-void MainWindow::pteASLInfoLineAction()
+int MainWindow::updateCal2HeaderFile()
 {
-    int line = getLineNumberByCursor(ui->m_pteASLInfo);
-    statusBar()->showMessage(tr("line %1 selected").arg(line), 2000);
-}
-*/
+    bool ok;
+    QByteArray ba;
 
-void MainWindow::pteSignerInfoLineAction()
-{
-    int line = getLineNumberByCursor(ui->m_pteSignerInfo);
-    statusBar()->showMessage(tr("line %1 selected").arg(line), 2000);
-}
+    LISTWIDGET_TEXTSET(m_listCal2DLS,
+    	m_pCal2HeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_TEXTSET(m_listCal2HPN,
+    	m_pCal2HeaderFile->getSectionDataByName("$Hex Part Number$"));
+    LISTWIDGET_TEXTSET(m_listCal2CCID,
+    	m_pCal2HeaderFile->getSectionDataByName("$CCID$"));
+    LISTWIDGET_TEXTSET(m_listCal2CCID,
+    	m_pCal2HeaderFile->getSectionDataByName("@CCID@"));
 
-void MainWindow::pteSignatureLineAction()
-{
-    int line = getLineNumberByCursor(ui->m_pteSignature);
-    statusBar()->showMessage(tr("line %1 selected").arg(line), 2000);
+    return 0;
 }
 
 void MainWindow::saveBinaryFile()
@@ -265,6 +380,7 @@ void MainWindow::saveBinaryFile()
     }
 
     const char dataType[] = {0x03, 0x01};
+#if 0
     //QByteArray baDataType(QByteArray::fromRawData(dataType, sizeof(dataType)));
     outFile->write(dataType, sizeof(dataType));
     outFile->write(m_pAppHeaderFile->m_moduleId);
@@ -276,6 +392,7 @@ void MainWindow::saveBinaryFile()
     outFile->write(m_pAppHeaderFile->m_msgDigest);
     outFile->write(m_pAppHeaderFile->m_signerInfo);
     outFile->write(m_pAppHeaderFile->m_signature);
+#endif
 
     // then s19 file in binary format
     for (auto d : m_pSrecordFile->m_dataRecords)
@@ -294,7 +411,7 @@ void MainWindow::saveBinaryFile()
     statusBar()->showMessage(tr("Binary file %1 saved success.").arg(fileName), 2000);
 }
 
-void MainWindow::saveAppHeaderFile()
+void MainWindow::loadS19File(SrecFile *pSrecordFile)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open"), QString(), tr("Motorola S-record Files (*.s19);;All Files (*.*)"));
@@ -302,9 +419,9 @@ void MainWindow::saveAppHeaderFile()
     if (fileName.isEmpty())
         return;
 
-    m_pSrecordFile = new SrecFile(fileName);
+    pSrecordFile = new SrecFile(fileName);
 
-    if (m_pSrecordFile == NULL)
+    if (pSrecordFile == NULL)
     {
         statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
         return;
@@ -315,7 +432,7 @@ void MainWindow::saveAppHeaderFile()
 
 void MainWindow::on_actionLoad_File_triggered()
 {
-    saveAppHeaderFile();
+    loadS19File(m_pSrecordFile);
 }
 
 void MainWindow::on_m_pbClose_clicked()
@@ -325,17 +442,42 @@ void MainWindow::on_m_pbClose_clicked()
 
 void MainWindow::on_m_pbSaveHdr_clicked()
 {
-    updateAppHeaderFile();
+	QString msg;
 
-    if (m_pAppHeaderFile)
+    msg.clear();
+    if (!m_pAppHeaderFile || !m_pCal1HeaderFile ||!m_pCal2HeaderFile)
     {
-        if (m_pAppHeaderFile->save(FILENAME_APP_SIGNED_HEADER) == 0)
-        {
-            statusBar()->showMessage(tr("File %1 saved success.").arg(FILENAME_APP_SIGNED_HEADER), 2000);
-            return;
-        }
+    	// should not comes here
+    	return;
     }
-    statusBar()->showMessage(tr("File %1 saved failure.").arg(FILENAME_APP_SIGNED_HEADER), 2000);
+
+    updateAppHeaderFile();
+    updateCal1HeaderFile();
+    updateCal2HeaderFile();
+
+    if (m_pAppHeaderFile->save(FILENAME_APP_SIGNED_HEADER) != 0)
+    {
+    	msg += tr("File %1 saved failure.\n").arg(FILENAME_APP_SIGNED_HEADER);
+    }
+
+    if (m_pCal1HeaderFile->save(FILENAME_CAL1_SIGNED_HEADER) != 0)
+    {
+    	msg += tr("File %1 saved failure.\n").arg(FILENAME_CAL1_SIGNED_HEADER);
+    }
+
+    if (m_pCal2HeaderFile->save(FILENAME_CAL2_SIGNED_HEADER) != 0)
+    {
+    	msg += tr("File %1 saved failure.\n").arg(FILENAME_CAL2_SIGNED_HEADER);
+    }
+
+    if (!msg.isEmpty())
+    {
+    	messageBoxAlert(msg);
+    }
+    else
+    {
+    	statusBar()->showMessage(tr("Header files are saved success."), 2000);
+    }
 }
 
 void MainWindow::on_m_pbSaveBin_clicked()
@@ -353,7 +495,7 @@ void MainWindow::on_actionAbout_triggered()
     QMessageBox message(
         QMessageBox::Information,
         "About",
-        "Motorola S-record to Binary Utility Version 1.0.01",
+        "Motorola S-record to Binary Utility Version 1.1.01",
         QMessageBox::Ok,
         NULL);
     message.exec();
@@ -362,6 +504,8 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_actionReLoad_triggered()
 {
     loadAppHeaderFile();
+    loadCal1HeaderFile();
+    loadCal2HeaderFile();
 }
 
 void MainWindow::on_m_cbASLInfoSub0_currentIndexChanged(int index)
