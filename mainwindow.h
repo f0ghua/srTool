@@ -6,6 +6,7 @@
 
 #include "SrecFile.h"
 #include "HeaderFile.h"
+#include "BinFile.h"
 
 #define FILENAME_APP_SIGNED_HEADER      "App_Signed_Header.txt"
 #define FILENAME_CAL1_SIGNED_HEADER     "Cal1_Signed_Header.txt"
@@ -58,13 +59,19 @@ private:
     SrecFile *m_pAppSrecordFile;
     SrecFile *m_pCal1SrecordFile;
     SrecFile *m_pCal2SrecordFile;
+    BinFile *m_pBinFile;
+
     QStandardItemModel* m_model;
 
-    int loadS19File(SrecFile **pSrecordFile);
+    int loadS19File(SrecFile *pSrecordFile);
     void saveBinaryFiles();
     int loadAppHeaderFile();
     int loadCal1HeaderFile();
     int loadCal2HeaderFile();
+    void updateAppHeaderOnGui();
+    void updateCal1HeaderOnGui();
+    void updateCal2HeaderOnGui();
+    void updateHeadersOnGui();
     int updateAppHeaderFile();
     int updateCal1HeaderFile();
     int updateCal2HeaderFile();

@@ -15,9 +15,7 @@
 static const char g_dataTypeSig[] = {0x03, 0x01};
 static const char g_dataTypeInf[] = {0x01, 0x01};
 
-#define ARRAY_SIZE(x) sizeof((x))/sizeof((x)[0])
-
-static const SecHelper_t g_appSectionMapping[] = {
+const SecHelper_t g_appSectionMapping[HDRFILE_APP_SECTIONS] = {
 	// App Signed Header (data type 03 01)
 	{"@Module ID@", 2, NULL},
 	{"@BCID@", 2, NULL},
@@ -54,7 +52,7 @@ static const SecHelper_t g_appSectionMapping[] = {
 	{"$P2.Cal Module Info 1$", 12, NULL}
 };
 
-static const SecHelper_t g_calSectionMapping[] = {
+const SecHelper_t g_calSectionMapping[HDRFILE_CAL_SECTIONS] = {
 	// App Signed Header (data type 03 01)
 	{"@Module ID@", 2, NULL},
 	{"@CCID@", 2, NULL},
@@ -128,8 +126,9 @@ qint32 HeaderFile::load(QString fileName)
     QFileInfo fileinfo = QFileInfo(fileName);
     m_fileName = fileinfo.fileName();
 
+    m_sigSections.clear();
+    m_infSections.clear();
     section.clear();
-
     while (!inFile->atEnd())
     {
         line = QString(inFile->readLine().simplified());

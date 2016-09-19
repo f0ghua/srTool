@@ -44,10 +44,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+/*
     const QRect ag = QApplication::desktop()->availableGeometry(this);
     qint32 w = ag.width() * 2 / 3;
     resize(w , w * 3 / 4);
-
+*/
     QGroupBox *gb;
     gb = this->findChild<QGroupBox *>("m_gbAppDLS");
     if (gb != NULL)
@@ -132,6 +133,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->m_tblFileList->verticalHeader()->setDefaultSectionSize(16);
     m_model = new QStandardItemModel(ui->m_tblFileList);
 
+    m_pAppHeaderFile = new HeaderFile();
+    m_pCal1HeaderFile = new HeaderFile();
+    m_pCal2HeaderFile = new HeaderFile();
+    m_pAppSrecordFile = new SrecFile();
+    m_pCal1SrecordFile = new SrecFile();
+    m_pCal2SrecordFile = new SrecFile();
+
     on_actionReLoad_triggered();
 }
 
@@ -146,34 +154,8 @@ MainWindow::~MainWindow()
     if (m_pCal2SrecordFile) delete m_pCal2SrecordFile;
 }
 
-int MainWindow::loadAppHeaderFile()
+void MainWindow::updateAppHeaderOnGui()
 {
-    m_pAppHeaderFile = new HeaderFile();
-    if (m_pAppHeaderFile->load(FILENAME_APP_SIGNED_HEADER) == -1) {
-    	messageBoxAlert("load app signed header file failure.");
-    	return -1;
-    }
-
-#if 0//ndef F_NO_DEBUG
-    for (int i = 0; i < m_pAppHeaderFile->m_sigSections.count(); i++)
-    {
-    	qDebug() << "section: " << m_pAppHeaderFile->m_sigSections[i].name;
-    	qDebug() << qPrintable(Utility::formatByteArray(&m_pAppHeaderFile->m_sigSections[i].data));
-    }
-
-    for (int i = 0; i < m_pAppHeaderFile->m_infSections.count(); i++)
-    {
-    	qDebug() << "section: " << m_pAppHeaderFile->m_infSections[i].name;
-    	qDebug() << qPrintable(Utility::formatByteArray(&m_pAppHeaderFile->m_infSections[i].data));
-    }
-#endif
-
-    QString s;
-    if (!m_pAppHeaderFile->appHeaderIsValid(s))
-    {
-    	messageBoxAlert(s);
-    }
-
     LISTWIDGET_SETTEXT(m_listAppDLS,
     	m_pAppHeaderFile->getSectionDataByName("$DLS$"));
     LISTWIDGET_SETTEXT(m_listAppHPN,
@@ -199,13 +181,70 @@ int MainWindow::loadAppHeaderFile()
         for (int i = 0; i < 8*pBa->at(1); i++)
             m_listAppASLInfo.at(i)->setText(Utility::formatHexNumber(pBa->at(i+2)&0xFF));
     }
+}
+
+void MainWindow::updateCal1HeaderOnGui()
+{
+    LISTWIDGET_SETTEXT(m_listCal1DLS,
+    	m_pCal1HeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_SETTEXT(m_listCal1HPN,
+    	m_pCal1HeaderFile->getSectionDataByName("$Hex Part Number$"))
+    LISTWIDGET_SETTEXT(m_listCal1CCID,
+    	m_pCal1HeaderFile->getSectionDataByName("$CCID$"))
+}
+
+void MainWindow::updateCal2HeaderOnGui()
+{
+    LISTWIDGET_SETTEXT(m_listCal2DLS,
+    	m_pCal2HeaderFile->getSectionDataByName("$DLS$"));
+    LISTWIDGET_SETTEXT(m_listCal2HPN,
+    	m_pCal2HeaderFile->getSectionDataByName("$Hex Part Number$"))
+    LISTWIDGET_SETTEXT(m_listCal2CCID,
+    	m_pCal2HeaderFile->getSectionDataByName("$CCID$"))
+}
+
+void MainWindow::updateHeadersOnGui()
+{
+	updateAppHeaderOnGui();
+	updateCal1HeaderOnGui();
+	updateCal2HeaderOnGui();
+}
+
+int MainWindow::loadAppHeaderFile()
+{
+    if (m_pAppHeaderFile->load(FILENAME_APP_SIGNED_HEADER) == -1) {
+    	messageBoxAlert("load app signed header file failure.");
+    	return -1;
+    }
+
+#if 0//ndef F_NO_DEBUG
+    for (int i = 0; i < m_pAppHeaderFile->m_sigSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pAppHeaderFile->m_sigSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pAppHeaderFile->m_sigSections[i].data));
+    }
+
+    for (int i = 0; i < m_pAppHeaderFile->m_infSections.count(); i++)
+    {
+    	qDebug() << "section: " << m_pAppHeaderFile->m_infSections[i].name;
+    	qDebug() << qPrintable(Utility::formatByteArray(&m_pAppHeaderFile->m_infSections[i].data));
+    }
+#endif
+
+    QString s;
+    if (!m_pAppHeaderFile->appHeaderIsValid(s))
+    {
+    	messageBoxAlert(s);
+    	return -1;
+    }
+
+    updateAppHeaderOnGui();
 
     return 0;
 }
 
 int MainWindow::loadCal1HeaderFile()
 {
-    m_pCal1HeaderFile = new HeaderFile();
     if (m_pCal1HeaderFile->load(FILENAME_CAL1_SIGNED_HEADER) == -1) {
     	messageBoxAlert("Load cal1 signed header file failure.");
     	return -1;
@@ -229,21 +268,16 @@ int MainWindow::loadCal1HeaderFile()
     if (!m_pCal1HeaderFile->calHeaderIsValid(s))
     {
     	messageBoxAlert(s);
+    	return -1;
     }
 
-    LISTWIDGET_SETTEXT(m_listCal1DLS,
-    	m_pCal1HeaderFile->getSectionDataByName("$DLS$"));
-    LISTWIDGET_SETTEXT(m_listCal1HPN,
-    	m_pCal1HeaderFile->getSectionDataByName("$Hex Part Number$"))
-    LISTWIDGET_SETTEXT(m_listCal1CCID,
-    	m_pCal1HeaderFile->getSectionDataByName("$CCID$"))
+	updateCal1HeaderOnGui();
 
     return 0;
 }
 
 int MainWindow::loadCal2HeaderFile()
 {
-    m_pCal2HeaderFile = new HeaderFile();
     if (m_pCal2HeaderFile->load(FILENAME_CAL2_SIGNED_HEADER) == -1) {
     	messageBoxAlert("Load cal2 signed header file failure.");
     	return -1;
@@ -267,14 +301,10 @@ int MainWindow::loadCal2HeaderFile()
     if (!m_pCal2HeaderFile->calHeaderIsValid(s))
     {
     	messageBoxAlert(s);
+    	return -1;
     }
 
-    LISTWIDGET_SETTEXT(m_listCal2DLS,
-    	m_pCal2HeaderFile->getSectionDataByName("$DLS$"));
-    LISTWIDGET_SETTEXT(m_listCal2HPN,
-    	m_pCal2HeaderFile->getSectionDataByName("$Hex Part Number$"))
-    LISTWIDGET_SETTEXT(m_listCal2CCID,
-    	m_pCal2HeaderFile->getSectionDataByName("$CCID$"))
+    updateCal2HeaderOnGui();
 
     return 0;
 }
@@ -533,23 +563,8 @@ void MainWindow::saveBinaryFiles()
     statusBar()->showMessage(tr("Binary files saved success."), 2000);
 }
 
-int MainWindow::loadS19File(SrecFile **pSrecordFile)
+int MainWindow::loadS19File(SrecFile *pSrecordFile)
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open"), QString(), tr("Motorola S-record Files (*.s19);;All Files (*.*)"));
-
-    if (fileName.isEmpty())
-        return -1;
-
-    *pSrecordFile = new SrecFile(fileName);
-
-    if (*pSrecordFile == NULL)
-    {
-        statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
-        return -1;
-    }
-
-    statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
     return 0;
 }
 
@@ -667,7 +682,7 @@ void MainWindow::on_actionAbout_triggered()
     QMessageBox message(
         QMessageBox::Information,
         "About",
-        "Motorola S-record to Binary Utility Version 1.1.01",
+        "Motorola S-record to Binary Utility Version 1.1.02",
         QMessageBox::Ok,
         NULL);
     message.exec();
@@ -697,21 +712,92 @@ void MainWindow::on_m_cbASLInfoSub0_currentIndexChanged(int index)
 
 void MainWindow::on_actionLoad_Cal1_Srec_File_triggered()
 {
-    if (loadS19File(&m_pCal1SrecordFile) == -1)
-    	return;
-    updateTableView();
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open"), QString(), tr("Motorola S-record Files (*.s19);;Binary Files (*.bin);;All Files (*.*)"));
+
+    if (fileName.isEmpty())
+        return;
+
+    QFileInfo fi(fileName);
+    QString ext = fi.suffix();
+
+    if (ext.toLower() == "bin")
+    {
+    	BinFile::loadCalFileEx(fileName, m_pCal1HeaderFile, m_pCal1SrecordFile);
+    	updateCal1HeaderOnGui();
+
+    	statusBar()->showMessage(tr("Update app signed header from %1.").arg(fileName), 2000);
+	}
+	else
+	{
+		if (m_pCal1SrecordFile->load(fileName) == -1)
+		{
+			statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
+			return;
+		}
+
+		updateTableView();
+		statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
+	}
 }
 
 void MainWindow::on_actionLoad_Cal2_Srec_File_triggered()
 {
-    if (loadS19File(&m_pCal2SrecordFile) == -1)
-    	return;
-    updateTableView();
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open"), QString(), tr("Motorola S-record Files (*.s19);;Binary Files (*.bin);;All Files (*.*)"));
+
+    if (fileName.isEmpty())
+        return;
+
+    QFileInfo fi(fileName);
+    QString ext = fi.suffix();
+
+    if (ext.toLower() == "bin")
+    {
+    	BinFile::loadCalFileEx(fileName, m_pCal2HeaderFile, m_pCal2SrecordFile);
+    	updateCal2HeaderOnGui();
+
+    	statusBar()->showMessage(tr("Update app signed header from %1.").arg(fileName), 2000);
+	}
+	else
+	{
+		if (m_pCal2SrecordFile->load(fileName) == -1)
+		{
+			statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
+			return;
+		}
+		updateTableView();
+		statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
+	}
 }
 
 void MainWindow::on_actionLoad_App_Srec_File_triggered()
 {
-    if (loadS19File(&m_pAppSrecordFile) == -1)
-    	return;
-    updateTableView();
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open"), QString(), tr("Motorola S-record Files (*.s19);;Binary Files (*.bin);;All Files (*.*)"));
+
+    if (fileName.isEmpty())
+        return;
+
+    QFileInfo fi(fileName);
+    QString ext = fi.suffix();
+
+    if (ext.toLower() == "bin")
+    {
+    	BinFile::loadAppFileEx(fileName, m_pAppHeaderFile, m_pAppSrecordFile);
+    	updateAppHeaderOnGui();
+
+    	statusBar()->showMessage(tr("Update app signed header from %1.").arg(fileName), 2000);
+	}
+	else
+	{
+		if (m_pAppSrecordFile->load(fileName) == -1)
+		{
+			statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
+			return;
+		}
+
+		updateTableView();
+		statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
+	}
 }

@@ -4,3 +4,4 @@
 - txt文件命名APP.txt, CAL1.txt, CAL2.txt
 - 支持命令行操作
 - 从binay读取txt
+    + load binary file, 

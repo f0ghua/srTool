@@ -19,8 +19,13 @@
 #define SECTION_SIGNEDHDR			0
 #define SECTION_INFO				1
 
+#define HDRFILE_APP_SECTIONS		30
+#define HDRFILE_CAL_SECTIONS		17
+
 #define HDRFILE_TYPE_APP			0
 #define HDRFILE_TYPE_CAL			1
+
+#define ARRAY_SIZE(x) sizeof((x))/sizeof((x)[0])
 
 struct HFileSection_t {
 	QString name;
@@ -36,6 +41,9 @@ struct SecHelper_t {
 	int len;
 	FunValidator func;
 };
+
+extern const SecHelper_t g_appSectionMapping[];
+extern const SecHelper_t g_calSectionMapping[];
 
 class HeaderFile : public QObject
 {

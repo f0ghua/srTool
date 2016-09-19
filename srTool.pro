@@ -22,12 +22,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     SrecFile.cpp \
     Utility.cpp \
-    HeaderFile.cpp
+    HeaderFile.cpp \
+    BinFile.cpp
 
 HEADERS  += mainwindow.h \
     SrecFile.h \
     Utility.h \
-    HeaderFile.h
+    HeaderFile.h \
+    BinFile.h
 
 FORMS    += mainwindow.ui
 
