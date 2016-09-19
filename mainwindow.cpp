@@ -5,6 +5,7 @@
 
 #include <QDesktopWidget>
 #include <QFileDialog>
+#include <QDir>
 #include <QTextCursor>
 #include <QTextBlock>
 #include <QRegExp>
@@ -17,7 +18,7 @@
 #endif
 
 #define LISTWIDGET_SETTEXT(l, a) \
-    if ((l).count() == (a)->count()) \
+    if ((a) && ((l).count() == (a)->count())) \
     { \
         for (int i = 0; i < (l).count(); i++) \
             (l).at(i)->setText(Utility::formatHexNumber((a)->at(i)&0xFF)); \
@@ -34,12 +35,17 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_pSrecordFile()
+    m_pAppHeaderFile(NULL),
+    m_pCal1HeaderFile(NULL),
+    m_pCal2HeaderFile(NULL),
+    m_pAppSrecordFile(NULL),
+    m_pCal1SrecordFile(NULL),
+    m_pCal2SrecordFile(NULL)
 {
     ui->setupUi(this);
 
     const QRect ag = QApplication::desktop()->availableGeometry(this);
-    qint32 w = ag.width() * 1 / 2;
+    qint32 w = ag.width() * 2 / 3;
     resize(w , w * 3 / 4);
 
     QGroupBox *gb;
@@ -123,17 +129,21 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < list.count(); i++)
         list.at(i)->setValidator(pReg);
 
-    on_actionReLoad_triggered();
+    ui->m_tblFileList->verticalHeader()->setDefaultSectionSize(16);
+    m_model = new QStandardItemModel(ui->m_tblFileList);
 
+    on_actionReLoad_triggered();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 
-    if (m_pSrecordFile) delete m_pSrecordFile;
     if (m_pAppHeaderFile) delete m_pAppHeaderFile;
     if (m_pCal1HeaderFile) delete m_pCal1HeaderFile;
+    if (m_pAppSrecordFile) delete m_pAppSrecordFile;
+    if (m_pCal1SrecordFile) delete m_pCal1SrecordFile;
+    if (m_pCal2SrecordFile) delete m_pCal2SrecordFile;
 }
 
 int MainWindow::loadAppHeaderFile()
@@ -175,7 +185,7 @@ int MainWindow::loadAppHeaderFile()
 
     QByteArray *pBa=
     	m_pAppHeaderFile->getSectionDataByName("$App SW Location Info$");
-    if (!pBa->isEmpty() && (pBa->at(0) == 0) &&
+    if (pBa && (!pBa->isEmpty()) && (pBa->at(0) == 0) &&
     	(pBa->at(1) == 1 || pBa->at(1) == 2)) {
     	if (pBa->at(1) == 1) {
     		ui->m_cbASLInfoSub0->setCurrentIndex(0);
@@ -350,89 +360,251 @@ int MainWindow::updateCal2HeaderFile()
     return 0;
 }
 
-void MainWindow::saveBinaryFile()
+bool MainWindow::copyFileToPath(QString sourceDir ,QString toDir, bool coverFileIfExist)
 {
-    //qDebug() << "m_pSrecordFile = " << m_pSrecordFile;
-    if (!m_pSrecordFile)
+    toDir.replace("\\","/");
+    if (sourceDir == toDir){
+        return true;
+    }
+    if (!QFile::exists(sourceDir)){
+        return false;
+    }
+    QDir *createfile     = new QDir;
+    bool exist = createfile->exists(toDir);
+    if (exist){
+        if(coverFileIfExist){
+            createfile->remove(toDir);
+        }
+    }//end if
+
+    if(!QFile::copy(sourceDir, toDir))
+    {
+        return false;
+    }
+    return true;
+}
+
+void MainWindow::saveBinaryFiles()
+{
+	QString msg;
+	QFile *outFile;
+	qint64 v;
+	QByteArray ba;
+
+    if (!m_pAppSrecordFile || !m_pCal1SrecordFile || !m_pCal2SrecordFile)
     {
         QMessageBox message(
             QMessageBox::Warning,
-            "Warning","Please load the Motorola S-record file first.",
+            "Warning","Please load the Motorola S-record files first.",
             QMessageBox::Ok,
             NULL);
         message.exec();
         return;
     }
-
+/*
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save"), QString(), tr("Binary Files (*.bin);;All Files (*.*)"));
 
     if (fileName.isEmpty())
         return;
-
-    //qDebug() << fileName;
-
-    QFile *outFile = new QFile(fileName);
+*/
+    QString fileNameAppBin("APP.bin");
+    QString fileNameAppHex("APP.hex");
+    if ((v = m_pAppHeaderFile->getHexPartNumber()) != -1)
+    {
+    	fileNameAppBin = QString::number(v) + ".bin";
+    	fileNameAppHex = QString::number(v) + ".hex";
+    }
+    outFile = new QFile(fileNameAppBin);
     if (!outFile->open(QIODevice::WriteOnly))
     {
         delete outFile;
         return;
     }
-
-    const char dataType[] = {0x03, 0x01};
-#if 0
-    //QByteArray baDataType(QByteArray::fromRawData(dataType, sizeof(dataType)));
-    outFile->write(dataType, sizeof(dataType));
-    outFile->write(m_pAppHeaderFile->m_moduleId);
-    outFile->write(m_pAppHeaderFile->m_bcid);
-    outFile->write(m_pAppHeaderFile->m_ecuName);
-    outFile->write(m_pAppHeaderFile->m_ecuId);
-    outFile->write(m_pAppHeaderFile->m_appNbid);
-    outFile->write(m_pAppHeaderFile->m_aslInfo);
-    outFile->write(m_pAppHeaderFile->m_msgDigest);
-    outFile->write(m_pAppHeaderFile->m_signerInfo);
-    outFile->write(m_pAppHeaderFile->m_signature);
-#endif
-
-    // then s19 file in binary format
-    for (auto d : m_pSrecordFile->m_dataRecords)
+    msg.clear();
+    ba = m_pAppHeaderFile->getBinData(HDRFILE_TYPE_APP, msg);
+    if (ba.isEmpty())
     {
-        QByteArray &ba = d.binData;
+    	QString tempStr;
 
-#ifndef F_NO_DEBUG
+    	tempStr = tr("Header file %1 save binary wrong:\n").arg(m_pAppHeaderFile->m_fileName);
+    	tempStr += msg;
+    	messageBoxAlert(tempStr);
+        delete outFile;
+        return;
+    }
+    outFile->write(ba);
+    // then s19 file in binary format
+    for (auto d : m_pAppSrecordFile->m_dataRecords)
+    {
+        QByteArray &rBa = d.binData;
+
+#if 0//ndef F_NO_DEBUG
         qDebug() << ba.count() << ":" << ba.toHex();
 #endif
-        outFile->write(ba);
+        outFile->write(rBa);
     }
-
     outFile->close();
     delete outFile;
+    copyFileToPath(m_pAppSrecordFile->m_fileFullPath, fileNameAppHex, true);
 
-    statusBar()->showMessage(tr("Binary file %1 saved success.").arg(fileName), 2000);
+    QString fileNameCal1Bin("CAL1.bin");
+    QString fileNameCal1Hex("CAL1.hex");
+    if ((v = m_pCal1HeaderFile->getHexPartNumber()) != -1)
+    {
+    	fileNameCal1Bin = QString::number(v) + ".bin";
+    	fileNameCal1Hex = QString::number(v) + ".hex";
+    }
+    outFile = new QFile(fileNameCal1Bin);
+    if (!outFile->open(QIODevice::WriteOnly))
+    {
+        delete outFile;
+        return;
+    }
+    msg.clear();
+    ba = m_pCal1HeaderFile->getBinData(HDRFILE_TYPE_CAL, msg);
+    if (ba.isEmpty())
+    {
+    	QString tempStr;
+
+    	tempStr = tr("Header file %1 save binary wrong:\n").arg(m_pCal1HeaderFile->m_fileName);
+    	tempStr += msg;
+    	messageBoxAlert(tempStr);
+        delete outFile;
+        return;
+    }
+    outFile->write(ba);
+    // then s19 file in binary format
+    for (auto d : m_pCal1SrecordFile->m_dataRecords)
+    {
+        QByteArray &rBa = d.binData;
+
+#if 0//ndef F_NO_DEBUG
+        qDebug() << ba.count() << ":" << ba.toHex();
+#endif
+        outFile->write(rBa);
+    }
+    outFile->close();
+    delete outFile;
+    copyFileToPath(m_pCal1SrecordFile->m_fileFullPath, fileNameCal1Hex, true);
+
+    QString fileNameCal2Bin("CAL2.bin");
+    QString fileNameCal2Hex("CAL2.hex");
+
+    if ((v = m_pCal2HeaderFile->getHexPartNumber()) != -1)
+    {
+    	fileNameCal2Bin = QString::number(v) + ".bin";
+    	fileNameCal2Hex = QString::number(v) + ".hex";
+    }
+    outFile = new QFile(fileNameCal2Bin);
+    if (!outFile->open(QIODevice::WriteOnly))
+    {
+        delete outFile;
+        return;
+    }
+    msg.clear();
+    ba = m_pCal2HeaderFile->getBinData(HDRFILE_TYPE_CAL, msg);
+    if (ba.isEmpty())
+    {
+    	QString tempStr;
+
+    	tempStr = tr("Header file %1 save binary wrong:\n").arg(m_pCal2HeaderFile->m_fileName);
+    	tempStr += msg;
+    	messageBoxAlert(tempStr);
+        delete outFile;
+        return;
+    }
+    outFile->write(ba);
+    // then s19 file in binary format
+    for (auto d : m_pCal2SrecordFile->m_dataRecords)
+    {
+        QByteArray &rBa = d.binData;
+
+#if 0//ndef F_NO_DEBUG
+        qDebug() << ba.count() << ":" << ba.toHex();
+#endif
+        outFile->write(rBa);
+    }
+    outFile->close();
+    delete outFile;
+    copyFileToPath(m_pCal2SrecordFile->m_fileFullPath, fileNameCal2Hex, true);
+
+
+    statusBar()->showMessage(tr("Binary files saved success."), 2000);
 }
 
-void MainWindow::loadS19File(SrecFile *pSrecordFile)
+int MainWindow::loadS19File(SrecFile **pSrecordFile)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open"), QString(), tr("Motorola S-record Files (*.s19);;All Files (*.*)"));
 
     if (fileName.isEmpty())
-        return;
+        return -1;
 
-    pSrecordFile = new SrecFile(fileName);
+    *pSrecordFile = new SrecFile(fileName);
 
-    if (pSrecordFile == NULL)
+    if (*pSrecordFile == NULL)
     {
         statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
-        return;
+        return -1;
     }
 
     statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
+    return 0;
 }
 
-void MainWindow::on_actionLoad_File_triggered()
+void MainWindow::updateTableView()
 {
-    loadS19File(m_pSrecordFile);
+	int row = 0, col = 0;
+	QStandardItem *item;
+
+    m_model->removeRows(0, m_model->rowCount());
+    ui->m_tblFileList->reset();
+
+    m_model->setColumnCount(2);
+    m_model->setHeaderData(col++, Qt::Horizontal, QStringLiteral("Type"));
+    m_model->setHeaderData(col++, Qt::Horizontal, QStringLiteral("Name"));
+
+    if (m_pAppSrecordFile) {
+    	col = 0;
+
+    	item = new QStandardItem(QStringLiteral("APP"));
+    	m_model->setItem(row, col++, item);
+
+    	item = new QStandardItem(m_pAppSrecordFile->m_fileName);
+    	m_model->setItem(row, col++, item);
+
+    	row++;
+    }
+
+    if (m_pCal1SrecordFile) {
+    	col = 0;
+
+    	item = new QStandardItem(QStringLiteral("CAL1"));
+    	m_model->setItem(row, col++, item);
+
+    	item = new QStandardItem(m_pCal1SrecordFile->m_fileName);
+    	m_model->setItem(row, col++, item);
+
+    	row++;
+    }
+
+    if (m_pCal2SrecordFile) {
+    	col = 0;
+
+    	item = new QStandardItem(QStringLiteral("CAL2"));
+    	m_model->setItem(row, col++, item);
+
+    	item = new QStandardItem(m_pCal2SrecordFile->m_fileName);
+    	m_model->setItem(row, col++, item);
+
+    	row++;
+    }
+
+    ui->m_tblFileList->setModel(m_model);
+    //ui->m_tblFileList->resizeColumnsToContents();
+    //ui->m_tblMain->setColumnWidth(0,180);
+    //ui->m_tblMain->setColumnWidth(1,240);
 }
 
 void MainWindow::on_m_pbClose_clicked()
@@ -482,7 +654,7 @@ void MainWindow::on_m_pbSaveHdr_clicked()
 
 void MainWindow::on_m_pbSaveBin_clicked()
 {
-    saveBinaryFile();
+    saveBinaryFiles();
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -521,5 +693,25 @@ void MainWindow::on_m_cbASLInfoSub0_currentIndexChanged(int index)
 			ui->m_wgASLInfoSub2->setVisible(true);
 			break;
 	}
+}
 
+void MainWindow::on_actionLoad_Cal1_Srec_File_triggered()
+{
+    if (loadS19File(&m_pCal1SrecordFile) == -1)
+    	return;
+    updateTableView();
+}
+
+void MainWindow::on_actionLoad_Cal2_Srec_File_triggered()
+{
+    if (loadS19File(&m_pCal2SrecordFile) == -1)
+    	return;
+    updateTableView();
+}
+
+void MainWindow::on_actionLoad_App_Srec_File_triggered()
+{
+    if (loadS19File(&m_pAppSrecordFile) == -1)
+    	return;
+    updateTableView();
 }

@@ -37,6 +37,8 @@ public:
     SrecFile(QString fileName);
     qint32 load(QString fileName);
 
+    QString m_fileFullPath;
+    QString m_fileName;
     SrecordHeader_t m_headerRecord;
     QMap<quint32, SrecordData_t> m_dataRecords;
     //QList<SrecordData_t> dataRecords;

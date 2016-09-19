@@ -14,23 +14,17 @@
    <string>srTool</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout_11">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>9</number>
-    </property>
+   <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="verticalLayout_3" stretch="10,1">
       <property name="spacing">
-       <number>24</number>
+       <number>8</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
       </property>
       <item>
        <widget class="QScrollArea" name="scrollArea">
@@ -42,8 +36,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>520</width>
-           <height>564</height>
+           <width>502</width>
+           <height>499</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout">
@@ -836,39 +830,76 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="2,1,1,1">
+       <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="1,1">
+        <property name="leftMargin">
+         <number>9</number>
+        </property>
+        <property name="rightMargin">
+         <number>9</number>
+        </property>
         <item>
-         <spacer name="horizontalSpacer_25">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QGroupBox" name="m_gbFileList">
+          <property name="title">
+           <string>Loaded S19 Files</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="m_pbSaveHdr">
-          <property name="text">
-           <string>Save Header</string>
-          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="1">
+            <widget class="QTableView" name="m_tblFileList">
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <attribute name="horizontalHeaderHighlightSections">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="horizontalHeaderStretchLastSection">
+              <bool>true</bool>
+             </attribute>
+             <attribute name="verticalHeaderVisible">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="verticalHeaderHighlightSections">
+              <bool>false</bool>
+             </attribute>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="m_pbSaveBin">
-          <property name="text">
-           <string>Save Binary</string>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Save Files</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="m_pbClose">
-          <property name="text">
-           <string>Close</string>
-          </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="0" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1">
+             <item>
+              <widget class="QPushButton" name="m_pbSaveHdr">
+               <property name="text">
+                <string>Save Headers</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="m_pbSaveBin">
+               <property name="text">
+                <string>Save Binaries</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="m_pbClose">
+               <property name="text">
+                <string>Close</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -890,7 +921,9 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionLoad_File"/>
+    <addaction name="actionLoad_App_Srec_File"/>
+    <addaction name="actionLoad_Cal1_Srec_File"/>
+    <addaction name="actionLoad_Cal2_Srec_File"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -911,20 +944,25 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionReLoad"/>
-   <addaction name="actionLoad_File"/>
+   <addaction name="actionLoad_App_Srec_File"/>
+   <addaction name="actionLoad_Cal1_Srec_File"/>
+   <addaction name="actionLoad_Cal2_Srec_File"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
   </widget>
-  <action name="actionLoad_File">
+  <action name="actionLoad_App_Srec_File">
    <property name="icon">
     <iconset resource="sctool.qrc">
-     <normaloff>:/menuOpen</normaloff>:/menuOpen</iconset>
+     <normaloff>:/menuOpenApp</normaloff>:/menuOpenApp</iconset>
    </property>
    <property name="text">
-    <string>Load Srec File</string>
+    <string>Load App Srec File</string>
+   </property>
+   <property name="toolTip">
+    <string>Load App Srec File</string>
    </property>
   </action>
   <action name="actionExit">
@@ -947,6 +985,24 @@
    </property>
    <property name="toolTip">
     <string>ReLoad App Header File</string>
+   </property>
+  </action>
+  <action name="actionLoad_Cal1_Srec_File">
+   <property name="icon">
+    <iconset resource="sctool.qrc">
+     <normaloff>:/menuOpenCal</normaloff>:/menuOpenCal</iconset>
+   </property>
+   <property name="text">
+    <string>Load Cal1 Srec File</string>
+   </property>
+  </action>
+  <action name="actionLoad_Cal2_Srec_File">
+   <property name="icon">
+    <iconset resource="sctool.qrc">
+     <normaloff>:/menuOpenCal</normaloff>:/menuOpenCal</iconset>
+   </property>
+   <property name="text">
+    <string>Load Cal2 Srec File</string>
    </property>
   </action>
  </widget>

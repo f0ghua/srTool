@@ -22,24 +22,22 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    static bool copyFileToPath(QString sourceDir ,QString toDir, bool coverFileIfExist);
 
 private slots:
-    void on_actionLoad_File_triggered();
     void on_m_pbClose_clicked();
     void on_m_pbSaveHdr_clicked();
     void on_m_pbSaveBin_clicked();
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
     void on_actionReLoad_triggered();
-
     void on_m_cbASLInfoSub0_currentIndexChanged(int index);
+    void on_actionLoad_Cal1_Srec_File_triggered();
+    void on_actionLoad_Cal2_Srec_File_triggered();
+    void on_actionLoad_App_Srec_File_triggered();
 
 private:
     Ui::MainWindow *ui;
-    HeaderFile *m_pAppHeaderFile;
-    HeaderFile *m_pCal1HeaderFile;
-    HeaderFile *m_pCal2HeaderFile;
-    SrecFile *m_pSrecordFile;
     QList<QLineEdit *> m_listAppDLS;
     QList<QLineEdit *> m_listAppHPN;
     QList<QLineEdit *> m_listAppBCID;
@@ -54,8 +52,16 @@ private:
     QList<QLineEdit *> m_listCal2HPN;
     QList<QLineEdit *> m_listCal2CCID;
 
-    void loadS19File(SrecFile *pSrecordFile);
-    void saveBinaryFile();
+    HeaderFile *m_pAppHeaderFile;
+    HeaderFile *m_pCal1HeaderFile;
+    HeaderFile *m_pCal2HeaderFile;
+    SrecFile *m_pAppSrecordFile;
+    SrecFile *m_pCal1SrecordFile;
+    SrecFile *m_pCal2SrecordFile;
+    QStandardItemModel* m_model;
+
+    int loadS19File(SrecFile **pSrecordFile);
+    void saveBinaryFiles();
     int loadAppHeaderFile();
     int loadCal1HeaderFile();
     int loadCal2HeaderFile();
@@ -63,6 +69,7 @@ private:
     int updateCal1HeaderFile();
     int updateCal2HeaderFile();
     void messageBoxAlert(QString s);
+    void updateTableView();
 };
 
 #endif // MAINWINDOW_H

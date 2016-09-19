@@ -1,6 +1,7 @@
 #include "SrecFile.h"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QByteArray>
 
 #include <QDebug>
@@ -32,6 +33,10 @@ qint32 SrecFile::load(QString fileName)
     QTime t;
     t.start();
 #endif
+
+    m_fileFullPath = fileName;
+    QFileInfo fileinfo = QFileInfo(fileName);
+    m_fileName = fileinfo.fileName();
 
     while (!inFile->atEnd())
     {

@@ -19,6 +19,9 @@
 #define SECTION_SIGNEDHDR			0
 #define SECTION_INFO				1
 
+#define HDRFILE_TYPE_APP			0
+#define HDRFILE_TYPE_CAL			1
+
 struct HFileSection_t {
 	QString name;
 	QByteArray data;
@@ -46,6 +49,10 @@ public:
     bool appHeaderIsValid(QString &msgOutput);
     bool calHeaderIsValid(QString &msgOutput);
     QByteArray *getSectionDataByName(const QString &name);
+    QByteArray getBinData(int type, QString &msgOutput);
+    QByteArray getBinDataWithOutCheck();
+    qint64 getHexPartNumber();
+
 	static bool appSWLInfoValidator(const QString fileName, const HFileSection_t *pSc, QString &msgOutput);
 
 	QString m_fileName;

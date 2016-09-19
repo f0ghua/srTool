@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file alias="menuOpen">images/tb_open16x16.png</file>
         <file alias="menuReload">images/reload_16x16.png</file>
+        <file alias="menuOpenApp">images/tb_open_app_16x16.png</file>
+        <file alias="menuOpenCal">images/tb_open_cal_16x16.png</file>
     </qresource>
 </RCC>

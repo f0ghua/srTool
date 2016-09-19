@@ -2,14 +2,18 @@
 #include "Utility.h"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QDebug>
 #include <QTime>
 
-#define F_NO_DEBUG
+//#define F_NO_DEBUG
 
 #define CH_COMMENT_INDICATOR "#"
 #define CH_SIGNAME_INDICATOR "@"	// signed header
 #define CH_INFNAME_INDICATOR "$"	// plain data info
+
+static const char g_dataTypeSig[] = {0x03, 0x01};
+static const char g_dataTypeInf[] = {0x01, 0x01};
 
 #define ARRAY_SIZE(x) sizeof((x))/sizeof((x)[0])
 
@@ -40,13 +44,13 @@ static const SecHelper_t g_appSectionMapping[] = {
 	{"$Hex Part Number$", 4, NULL},
 	{"$App SW Location Info$", 0, HeaderFile::appSWLInfoValidator},
 	{"$Number of Partitions$", 2, NULL},
-	{"$P1.Number of Regions$", 2, NULL},
+	{"$P1.Num of Regions$", 2, NULL},
 	{"$P1.Region Info 1$", 8, NULL},
-	{"$P1.Number of Cal Modules$", 2, NULL},
+	{"$P1.Num of Cal Modules$", 2, NULL},
 	{"$P1.Cal Module Info 1$", 12, NULL},
-	{"$P2.Number of Regions$", 2, NULL},
+	{"$P2.Num of Regions$", 2, NULL},
 	{"$P2.Region Info 1$", 8, NULL},
-	{"$P2.Number of Cal Modules$", 2, NULL},
+	{"$P2.Num of Cal Modules$", 2, NULL},
 	{"$P2.Cal Module Info 1$", 12, NULL}
 };
 
@@ -70,7 +74,6 @@ static const SecHelper_t g_calSectionMapping[] = {
 	{"$Configuration Options$", 2, NULL},
 	{"$Module ID$", 2, NULL},
 	{"$CCID$", 2, NULL},
-	{"$App-NBID$", 2, NULL},
 	{"$DLS$", 2, NULL},
 	{"$Hex Part Number$", 4, NULL},
 };
@@ -122,11 +125,32 @@ qint32 HeaderFile::load(QString fileName)
         return -1;
     }
 
-    m_fileName = fileName;
+    QFileInfo fileinfo = QFileInfo(fileName);
+    m_fileName = fileinfo.fileName();
+
+    section.clear();
 
     while (!inFile->atEnd())
     {
         line = QString(inFile->readLine().simplified());
+
+    	if ((line.startsWith(CH_SIGNAME_INDICATOR)) ||
+    		(line.startsWith(CH_INFNAME_INDICATOR)))
+    	{
+    		if (lastSectionType == SECTION_SIGNEDHDR) {
+    			if (!section.name.isEmpty() &&
+    				(indexOfSection(section.name, m_sigSections) == -1)) {
+    				m_sigSections.append(section);
+    			}
+    		}
+    		else {
+    			if (!section.name.isEmpty() &&
+    				(indexOfSection(section.name, m_infSections) == -1)) {
+    				m_infSections.append(section);
+    			}
+    		}
+    	}
+
         if (line.startsWith(CH_COMMENT_INDICATOR))
         {
         	// it's comment, do nothing
@@ -134,12 +158,6 @@ qint32 HeaderFile::load(QString fileName)
         else
         if (line.startsWith(CH_SIGNAME_INDICATOR))
         {
-        	if (!section.name.isEmpty() &&
-        		(indexOfSection(section.name, m_sigSections) == -1))
-        	{
-        		m_sigSections.append(section);
-        	}
-
         	section.clear();
         	int chEnd = line.indexOf(CH_SIGNAME_INDICATOR, 1);
         	if (chEnd != -1) {
@@ -153,12 +171,6 @@ qint32 HeaderFile::load(QString fileName)
         else
         if (line.startsWith(CH_INFNAME_INDICATOR))
         {
-        	if (!section.name.isEmpty() &&
-        		(indexOfSection(section.name, m_infSections) == -1))
-        	{
-        		m_infSections.append(section);
-        	}
-
         	section.clear();
         	int chEnd = line.indexOf(CH_INFNAME_INDICATOR, 1);
         	if (chEnd != -1) {
@@ -172,10 +184,12 @@ qint32 HeaderFile::load(QString fileName)
         else
         {
         	line.remove(" ");
-        	section.data += QByteArray::fromHex(line.toLatin1());
+        	if (!line.isEmpty()) {
+        		section.data += QByteArray::fromHex(line.toLatin1());
 #ifndef F_NO_DEBUG
         	qDebug() << "append data " << QByteArray::fromHex(line.toLatin1());
 #endif
+        	}
         }
 
         lineNumber++;
@@ -189,6 +203,9 @@ qint32 HeaderFile::load(QString fileName)
     	else if ((indexOfSection(section.name, m_infSections) == -1))
     		m_infSections.append(section);
     }
+
+    inFile->close();
+    delete inFile;
 
 	return 0;
 }
@@ -246,6 +263,77 @@ qint32 HeaderFile::save(QString fileName)
     delete outFile;
 
 	return 0;
+}
+
+QByteArray HeaderFile::getBinData(int type, QString &msgOutput)
+{
+	const SecHelper_t *pSh;
+	int arrayLen;
+	QByteArray ba;
+
+	if (type == HDRFILE_TYPE_APP)
+	{
+		pSh = &g_appSectionMapping[0];
+		arrayLen = ARRAY_SIZE(g_appSectionMapping);
+	}
+	else
+	{
+		pSh = &g_calSectionMapping[0];
+		arrayLen = ARRAY_SIZE(g_calSectionMapping);
+	}
+
+	ba.clear();
+	ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+
+	for (int i = 0; i < arrayLen; i++)
+	{
+		QByteArray *pBa = getSectionDataByName(pSh[i].name);
+		if (pBa == NULL)
+		{
+			msgOutput += tr("section %1 is missing\n").arg(pSh[i].name);
+			return QByteArray();
+		}
+		if (pSh[i].name == "$Integrity Word$")
+		{
+			ba.append(QByteArray::fromRawData(g_dataTypeInf, sizeof(g_dataTypeInf)));
+		}
+		ba.append(*pBa);
+	}
+
+	return ba;
+}
+
+QByteArray HeaderFile::getBinDataWithOutCheck()
+{
+	QByteArray ba;
+
+	ba.clear();
+	ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+	for (int i = 0; i < m_sigSections.count(); i++)
+	{
+		ba.append(m_sigSections.at(i).data);
+	}
+	ba.append(QByteArray::fromRawData(g_dataTypeInf, sizeof(g_dataTypeInf)));
+	for (int i = 0; i < m_infSections.count(); i++)
+	{
+		ba.append(m_infSections.at(i).data);
+	}
+
+	return ba;
+}
+
+qint64 HeaderFile::getHexPartNumber()
+{
+	qint64 r = 0;
+
+	QByteArray *pBa = getSectionDataByName("$Hex Part Number$");
+	if (pBa == NULL)
+		return -1;
+
+	for (int i = 0; i < pBa->count(); i++)
+		r = (r << 8) + (pBa->at(i)&0xFF);
+
+	return r;
 }
 
 QByteArray *HeaderFile::getSectionDataByName(const QString &name)
