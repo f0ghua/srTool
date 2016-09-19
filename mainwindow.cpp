@@ -332,10 +332,12 @@ int MainWindow::updateAppHeaderFile()
     	m_pAppHeaderFile->getSectionDataByName("$BCID$"));
     LISTWIDGET_TEXTSET(m_listAppNBID,
     	m_pAppHeaderFile->getSectionDataByName("$App-NBID$"));
+    /*
     LISTWIDGET_TEXTSET(m_listAppBCID,
     	m_pAppHeaderFile->getSectionDataByName("@BCID@"));
     LISTWIDGET_TEXTSET(m_listAppNBID,
     	m_pAppHeaderFile->getSectionDataByName("@App-NBID@"));
+    */
 
     int idx = ui->m_cbASLInfoSub0->currentIndex();
     int len = (idx+1)*8;
@@ -350,9 +352,10 @@ int MainWindow::updateAppHeaderFile()
     QByteArray *pBa;
     pBa = m_pAppHeaderFile->getSectionDataByName("$App SW Location Info$");
     if (pBa) *pBa = ba;
+	/*
     pBa = m_pAppHeaderFile->getSectionDataByName("@App SW Location Info@");
     if (pBa) *pBa = ba;
-
+	*/
     return 0;
 }
 
@@ -367,9 +370,10 @@ int MainWindow::updateCal1HeaderFile()
     	m_pCal1HeaderFile->getSectionDataByName("$Hex Part Number$"));
     LISTWIDGET_TEXTSET(m_listCal1CCID,
     	m_pCal1HeaderFile->getSectionDataByName("$CCID$"));
+    /*
     LISTWIDGET_TEXTSET(m_listCal1CCID,
     	m_pCal1HeaderFile->getSectionDataByName("@CCID@"));
-
+	*/
     return 0;
 }
 
@@ -384,8 +388,10 @@ int MainWindow::updateCal2HeaderFile()
     	m_pCal2HeaderFile->getSectionDataByName("$Hex Part Number$"));
     LISTWIDGET_TEXTSET(m_listCal2CCID,
     	m_pCal2HeaderFile->getSectionDataByName("$CCID$"));
+    /*
     LISTWIDGET_TEXTSET(m_listCal2CCID,
     	m_pCal2HeaderFile->getSectionDataByName("@CCID@"));
+    */
 
     return 0;
 }
@@ -682,7 +688,7 @@ void MainWindow::on_actionAbout_triggered()
     QMessageBox message(
         QMessageBox::Information,
         "About",
-        "Motorola S-record to Binary Utility Version 1.1.02",
+        "Motorola S-record to Binary Utility Version 1.1.03",
         QMessageBox::Ok,
         NULL);
     message.exec();
