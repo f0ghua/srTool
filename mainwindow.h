@@ -59,7 +59,9 @@ private:
     SrecFile *m_pAppSrecordFile;
     SrecFile *m_pCal1SrecordFile;
     SrecFile *m_pCal2SrecordFile;
-    BinFile *m_pBinFile;
+    BinFile *m_pAppBinFile;
+    BinFile *m_pCal1BinFile;
+    BinFile *m_pCal2BinFile;
 
     QStandardItemModel* m_model;
 

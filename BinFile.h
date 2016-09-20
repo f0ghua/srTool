@@ -10,10 +10,10 @@ class BinFile : public QObject
 {
     Q_OBJECT
 public:
-    explicit BinFile(QObject *parent = 0);
+    //explicit BinFile(QObject *parent = 0);
+    explicit BinFile(HeaderFile *pHeaderFile, SrecFile *pSrecFile, QObject *parent = 0);
     ~BinFile();
     qint32 load(QString fileName, int type);
-    qint32 loadAppFile(QString fileName);
 
     static qint32 loadAppFileEx(QString fileName, HeaderFile *pHeaderFile, SrecFile *pSrecFile);
     static qint32 loadCalFileEx(QString fileName, HeaderFile *pHeaderFile, SrecFile *pSrecFile);

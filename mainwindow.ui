@@ -840,17 +840,29 @@
         <item>
          <widget class="QGroupBox" name="m_gbFileList">
           <property name="title">
-           <string>Loaded S19 Files</string>
+           <string>Loaded S19/BIN Files</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
            <item row="0" column="1">
             <widget class="QTableView" name="m_tblFileList">
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(220, 220, 220);</string>
+             </property>
              <property name="editTriggers">
               <set>QAbstractItemView::NoEditTriggers</set>
              </property>
              <property name="selectionBehavior">
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
+             <attribute name="horizontalHeaderVisible">
+              <bool>false</bool>
+             </attribute>
              <attribute name="horizontalHeaderHighlightSections">
               <bool>false</bool>
              </attribute>

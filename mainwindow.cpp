@@ -9,6 +9,7 @@
 #include <QTextCursor>
 #include <QTextBlock>
 #include <QRegExp>
+#include <QIcon>
 
 //#define F_NO_DEBUG
 
@@ -140,6 +141,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pCal1SrecordFile = new SrecFile();
     m_pCal2SrecordFile = new SrecFile();
 
+    m_pAppBinFile = new BinFile(m_pAppHeaderFile, m_pAppSrecordFile);
+    m_pCal1BinFile = new BinFile(m_pCal1HeaderFile, m_pCal1SrecordFile);
+    m_pCal2BinFile = new BinFile(m_pCal2HeaderFile, m_pCal2SrecordFile);
+
     on_actionReLoad_triggered();
 }
 
@@ -152,6 +157,9 @@ MainWindow::~MainWindow()
     if (m_pAppSrecordFile) delete m_pAppSrecordFile;
     if (m_pCal1SrecordFile) delete m_pCal1SrecordFile;
     if (m_pCal2SrecordFile) delete m_pCal2SrecordFile;
+    if (m_pAppBinFile) delete m_pAppBinFile;
+    if (m_pCal1BinFile) delete m_pCal1BinFile;
+    if (m_pCal2BinFile) delete m_pCal2BinFile;
 }
 
 void MainWindow::updateAppHeaderOnGui()
@@ -586,10 +594,46 @@ void MainWindow::updateTableView()
     m_model->setHeaderData(col++, Qt::Horizontal, QStringLiteral("Type"));
     m_model->setHeaderData(col++, Qt::Horizontal, QStringLiteral("Name"));
 
-    if (m_pAppSrecordFile) {
+    if (!m_pAppBinFile->m_fileName.isEmpty()) {
+        col = 0;
+
+        item = new QStandardItem(QIcon(QStringLiteral(":iconBin")), QStringLiteral("BIN-APP"));
+        m_model->setItem(row, col++, item);
+
+        item = new QStandardItem(m_pAppBinFile->m_fileName);
+        m_model->setItem(row, col++, item);
+
+        row++;
+    }
+
+    if (!m_pCal1BinFile->m_fileName.isEmpty()) {
+        col = 0;
+
+        item = new QStandardItem(QIcon(QStringLiteral(":iconBin")), QStringLiteral("BIN-CAL1"));
+        m_model->setItem(row, col++, item);
+
+        item = new QStandardItem(m_pCal1BinFile->m_fileName);
+        m_model->setItem(row, col++, item);
+
+        row++;
+    }
+
+    if (!m_pCal2BinFile->m_fileName.isEmpty()) {
+        col = 0;
+
+        item = new QStandardItem(QIcon(QStringLiteral(":iconBin")), QStringLiteral("BIN-CAL2"));
+        m_model->setItem(row, col++, item);
+
+        item = new QStandardItem(m_pCal2BinFile->m_fileName);
+        m_model->setItem(row, col++, item);
+
+        row++;
+    }
+
+    if (!m_pAppSrecordFile->m_fileName.isEmpty()) {
     	col = 0;
 
-    	item = new QStandardItem(QStringLiteral("APP"));
+    	item = new QStandardItem(QIcon(QStringLiteral(":iconS19")), QStringLiteral("S19-APP"));
     	m_model->setItem(row, col++, item);
 
     	item = new QStandardItem(m_pAppSrecordFile->m_fileName);
@@ -598,10 +642,10 @@ void MainWindow::updateTableView()
     	row++;
     }
 
-    if (m_pCal1SrecordFile) {
+    if (!m_pCal1SrecordFile->m_fileName.isEmpty()) {
     	col = 0;
 
-    	item = new QStandardItem(QStringLiteral("CAL1"));
+    	item = new QStandardItem(QIcon(QStringLiteral(":iconS19")), QStringLiteral("S19-CAL1"));
     	m_model->setItem(row, col++, item);
 
     	item = new QStandardItem(m_pCal1SrecordFile->m_fileName);
@@ -610,10 +654,10 @@ void MainWindow::updateTableView()
     	row++;
     }
 
-    if (m_pCal2SrecordFile) {
+    if (!m_pCal2SrecordFile->m_fileName.isEmpty()) {
     	col = 0;
 
-    	item = new QStandardItem(QStringLiteral("CAL2"));
+    	item = new QStandardItem(QIcon(QStringLiteral(":iconS19")), QStringLiteral("S19-CAL2"));
     	m_model->setItem(row, col++, item);
 
     	item = new QStandardItem(m_pCal2SrecordFile->m_fileName);
@@ -688,7 +732,7 @@ void MainWindow::on_actionAbout_triggered()
     QMessageBox message(
         QMessageBox::Information,
         "About",
-        "Motorola S-record to Binary Utility Version 1.1.03",
+        "Motorola S-record to Binary Utility Version 1.1.04",
         QMessageBox::Ok,
         NULL);
     message.exec();
@@ -729,7 +773,11 @@ void MainWindow::on_actionLoad_Cal1_Srec_File_triggered()
 
     if (ext.toLower() == "bin")
     {
-    	BinFile::loadCalFileEx(fileName, m_pCal1HeaderFile, m_pCal1SrecordFile);
+        if (m_pCal1BinFile->load(fileName, HDRFILE_TYPE_CAL) == -1)
+        {
+            statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
+            return;
+        }
     	updateCal1HeaderOnGui();
 
     	statusBar()->showMessage(tr("Update app signed header from %1.").arg(fileName), 2000);
@@ -742,9 +790,9 @@ void MainWindow::on_actionLoad_Cal1_Srec_File_triggered()
 			return;
 		}
 
-		updateTableView();
 		statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
 	}
+    updateTableView();
 }
 
 void MainWindow::on_actionLoad_Cal2_Srec_File_triggered()
@@ -760,7 +808,11 @@ void MainWindow::on_actionLoad_Cal2_Srec_File_triggered()
 
     if (ext.toLower() == "bin")
     {
-    	BinFile::loadCalFileEx(fileName, m_pCal2HeaderFile, m_pCal2SrecordFile);
+        if (m_pCal2BinFile->load(fileName, HDRFILE_TYPE_CAL) == -1)
+        {
+            statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
+            return;
+        }
     	updateCal2HeaderOnGui();
 
     	statusBar()->showMessage(tr("Update app signed header from %1.").arg(fileName), 2000);
@@ -772,9 +824,9 @@ void MainWindow::on_actionLoad_Cal2_Srec_File_triggered()
 			statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
 			return;
 		}
-		updateTableView();
 		statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
 	}
+    updateTableView();
 }
 
 void MainWindow::on_actionLoad_App_Srec_File_triggered()
@@ -790,7 +842,11 @@ void MainWindow::on_actionLoad_App_Srec_File_triggered()
 
     if (ext.toLower() == "bin")
     {
-    	BinFile::loadAppFileEx(fileName, m_pAppHeaderFile, m_pAppSrecordFile);
+    	if (m_pAppBinFile->load(fileName, HDRFILE_TYPE_APP) == -1)
+        {
+            statusBar()->showMessage(tr("File %1 load failure.").arg(fileName), 2000);
+            return;
+        }
     	updateAppHeaderOnGui();
 
     	statusBar()->showMessage(tr("Update app signed header from %1.").arg(fileName), 2000);
@@ -803,7 +859,8 @@ void MainWindow::on_actionLoad_App_Srec_File_triggered()
 			return;
 		}
 
-		updateTableView();
 		statusBar()->showMessage(tr("File %1 loaded success.").arg(fileName), 2000);
 	}
+
+    updateTableView();
 }

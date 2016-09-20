@@ -4,5 +4,7 @@
         <file alias="menuReload">images/reload_16x16.png</file>
         <file alias="menuOpenApp">images/tb_open_app_16x16.png</file>
         <file alias="menuOpenCal">images/tb_open_cal_16x16.png</file>
+        <file alias="iconBin">images/file_bin_14x14.png</file>
+        <file alias="iconS19">images/file_s19_14x14.png</file>
     </qresource>
 </RCC>
