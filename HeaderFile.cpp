@@ -17,67 +17,68 @@ static const char g_dataTypeInf[] = {0x01, 0x01};
 
 const SecHelper_t g_appSectionMapping[HDRFILE_APP_SECTIONS] = {
 	// App Signed Header (data type 03 01)
-	{"@Module ID@", 2, NULL},
-	{"@BCID@", 2, NULL},
-	{"@ECU Name@", 8, NULL},
-	{"@ECU ID@", 16, NULL},
-	{"@App-NBID@", 2, NULL},
-	{"@App SW Location Info@", 0, HeaderFile::appSWLInfoValidator},
-	{"@Message Digest@", 32, NULL},
+	{"@Module ID@", 2, QString(), NULL},
+	{"@BCID@", 2, QString(), NULL},
+	{"@ECU Name@", 8, QString(), NULL},
+	{"@ECU ID@", 16, QString(), NULL},
+	{"@App-NBID@", 2, QString(), NULL},
+	{"@App SW Location Info@", 0, QString(), HeaderFile::appSWLInfoValidator},
+	{"@Message Digest@", 32, QString(), NULL},
 	// Signer Info 538
-	{"@Subject Name@", 16, NULL},
-	{"@Certificate ID@", 8, NULL},
-	{"@Key-NBID@", 2, NULL},
-	{"@Signer Public Key@", 256, NULL},
-	{"@Root Signature@", 256, NULL},
-	{"@Signature@", 256, NULL},
+	{"@Subject Name@", 16, QString(), NULL},
+	{"@Certificate ID@", 8, QString(), NULL},
+	{"@Key-NBID@", 2, QString(), NULL},
+	{"@Signer Public Key@", 256, QString(), NULL},
+	{"@Root Signature@", 256, QString(), NULL},
+	{"@Signature@", 256, QString(), NULL},
 
 	// App SW Info (data type 01 01)
-	{"$Integrity Word$", 2, NULL},
-	{"$Configuration Options$", 2, NULL},
-	{"$Module ID$", 2, NULL},
-	{"$BCID$", 2, NULL},
-	{"$App-NBID$", 2, NULL},
-	{"$DLS$", 2, NULL},
-	{"$Hex Part Number$", 4, NULL},
-	{"$App SW Location Info$", 0, HeaderFile::appSWLInfoValidator},
-	{"$Number of Partitions$", 2, NULL},
-	{"$P1.Num of Regions$", 2, NULL},
-	{"$P1.Region Info 1$", 8, NULL},
-	{"$P1.Num of Cal Modules$", 2, NULL},
-	{"$P1.Cal Module Info 1$", 12, NULL},
-	{"$P2.Num of Regions$", 2, NULL},
-	{"$P2.Region Info 1$", 8, NULL},
-	{"$P2.Num of Cal Modules$", 2, NULL},
-	{"$P2.Cal Module Info 1$", 12, NULL}
+	{"$Integrity Word$", 2, QString(), NULL},
+	{"$Configuration Options$", 2, QString(), NULL},
+	{"$Module ID$", 2, "@Module ID@", NULL},
+	{"$BCID$", 2, "@BCID@", NULL},
+	{"$App-NBID$", 2, "@App-NBID@", NULL},
+	{"$DLS$", 2, QString(), NULL},
+	{"$Hex Part Number$", 4, QString(), NULL},
+	{"$App SW Location Info$", 0, "@App SW Location Info@", HeaderFile::appSWLInfoValidator},
+	{"$Number of Partitions$", 2, QString(), NULL},
+	{"$P1.Num of Regions$", 2, QString(), NULL},
+	{"$P1.Region Info 1$", 8, QString(), NULL},
+	{"$P1.Num of Cal Modules$", 2, QString(), NULL},
+	{"$P1.Cal Module Info 1$", 12, QString(), NULL},
+	{"$P2.Num of Regions$", 2, QString(), NULL},
+	{"$P2.Region Info 1$", 8, QString(), NULL},
+	{"$P2.Num of Cal Modules$", 2, QString(), NULL},
+	{"$P2.Cal Module Info 1$", 12, QString(), NULL}
 };
 
 const SecHelper_t g_calSectionMapping[HDRFILE_CAL_SECTIONS] = {
 	// App Signed Header (data type 03 01)
-	{"@Module ID@", 2, NULL},
-	{"@CCID@", 2, NULL},
-	{"@ECU Name@", 8, NULL},
-	{"@ECU ID@", 16, NULL},
-	{"@Message Digest@", 32, NULL},
+	{"@Module ID@", 2, QString(), NULL},
+	{"@CCID@", 2, QString(), NULL},
+	{"@ECU Name@", 8, QString(), NULL},
+	{"@ECU ID@", 16, QString(), NULL},
+	{"@Message Digest@", 32, QString(), NULL},
 	// Signer Info 538
-	{"@Subject Name@", 16, NULL},
-	{"@Certificate ID@", 8, NULL},
-	{"@Key-NBID@", 2, NULL},
-	{"@Signer Public Key@", 256, NULL},
-	{"@Root Signature@", 256, NULL},
-	{"@Signature@", 256, NULL},
+	{"@Subject Name@", 16, QString(), NULL},
+	{"@Certificate ID@", 8, QString(), NULL},
+	{"@Key-NBID@", 2, QString(), NULL},
+	{"@Signer Public Key@", 256, QString(), NULL},
+	{"@Root Signature@", 256, QString(), NULL},
+	{"@Signature@", 256, QString(), NULL},
 
 	// App SW Info (data type 01 01)
-	{"$Integrity Word$", 2, NULL},
-	{"$Configuration Options$", 2, NULL},
-	{"$Module ID$", 2, NULL},
-	{"$CCID$", 2, NULL},
-	{"$DLS$", 2, NULL},
-	{"$Hex Part Number$", 4, NULL},
+	{"$Integrity Word$", 2, QString(), NULL},
+	{"$Configuration Options$", 2, QString(), NULL},
+	{"$Module ID$", 2, "@Module ID@", NULL},
+	{"$CCID$", 2, "@CCID@", NULL},
+	{"$DLS$", 2, QString(), NULL},
+	{"$Hex Part Number$", 4, QString(), NULL},
 };
 
-HeaderFile::HeaderFile() :
+HeaderFile::HeaderFile(int fileType) :
 	m_fileName(),
+	m_fileType(fileType),
 	m_sigSections()
 {
 
@@ -209,6 +210,56 @@ qint32 HeaderFile::load(QString fileName)
 	return 0;
 }
 
+qint32 HeaderFile::loadInfoSection(const QByteArray &ba)
+{
+    const SecHelper_t *arrayMapping;
+    int arrayLen;
+
+    if (m_fileType == HDRFILE_TYPE_APP) {
+        arrayMapping = &g_appSectionMapping[0];
+        arrayLen = HDRFILE_APP_SECTIONS;
+    } else {
+        arrayMapping = &g_calSectionMapping[0];
+        arrayLen = HDRFILE_CAL_SECTIONS;
+    }
+
+    QList<HFileSection_t> &linfSections = this->m_infSections;
+    linfSections.clear();
+
+    int pos = 0;
+    for (int i = 0; i < arrayLen; i++) {
+        const SecHelper_t *pSh = &arrayMapping[i];
+
+        if(pSh->name.startsWith('$')) {
+            HFileSection_t section;
+            section.name = pSh->name;
+            if (pSh->len == 0) {
+                section.data = ba.mid(pos, 2);
+                pos += 2;
+                int len = section.data.at(1)*8;
+                section.data += ba.mid(pos, len);
+                pos += len;
+            } else {
+                section.data = ba.mid(pos, pSh->len);
+                pos += pSh->len;
+            }
+
+            linfSections.append(section);
+
+            if (!pSh->syncName.isEmpty()) {
+            	QByteArray *pBa = getSectionDataByName(pSh->syncName);
+            	if (pBa != NULL)
+            		*pBa = section.data;
+            }
+        }
+    }
+
+    if (pos != ba.size())
+    	return -1;
+
+    return 0;
+}
+
 qint32 HeaderFile::save(QString fileName)
 {
     QString tempStr;
@@ -299,6 +350,48 @@ QByteArray HeaderFile::getBinData(int type, QString &msgOutput)
 		ba.append(*pBa);
 	}
 
+	return ba;
+}
+
+QByteArray HeaderFile::getHdrBinData(int type, QString &msgOutput)
+{
+	const SecHelper_t *pSh;
+	int arrayLen;
+	QByteArray ba;
+
+	if (type == HDRFILE_TYPE_APP) {
+		pSh = &g_appSectionMapping[0];
+		arrayLen = ARRAY_SIZE(g_appSectionMapping);
+	} else {
+		pSh = &g_calSectionMapping[0];
+		arrayLen = ARRAY_SIZE(g_calSectionMapping);
+	}
+
+	ba.clear();
+	ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+
+	for (int i = 0; i < arrayLen; i++) {
+		if(pSh[i].name.startsWith('@')) {
+			QByteArray *pBa = getSectionDataByName(pSh[i].name);
+			if (pBa == NULL) {
+				msgOutput += tr("section %1 is missing\n").arg(pSh[i].name);
+				return QByteArray();
+			}
+			ba.append(*pBa);
+		}
+	}
+
+	return ba;
+}
+
+QByteArray HeaderFile::getBlockHeader(int type)
+{
+	QByteArray ba;
+	if (type == SECTION_SIGNEDHDR) {
+		ba = QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig));
+	} else {
+		ba = QByteArray::fromRawData(g_dataTypeInf, sizeof(g_dataTypeInf));
+	}
 	return ba;
 }
 

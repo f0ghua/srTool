@@ -16,6 +16,8 @@
 #define SIZE_SINFO                  538
 #define SIZE_SIGNATURE              256
 
+#define MIN_APPHDR_SIZE				(866 + 0x200)
+#define MIN_CALHDR_SIZE				(854 + 0x20)
 #define SECTION_SIGNEDHDR			0
 #define SECTION_INFO				1
 
@@ -39,6 +41,7 @@ typedef bool (*FunValidator)(const QString fileName, const HFileSection_t *, QSt
 struct SecHelper_t {
 	QString name;
 	int len;
+	QString syncName;
 	FunValidator func;
 };
 
@@ -50,7 +53,7 @@ class HeaderFile : public QObject
 	Q_OBJECT
 
 public:
-    HeaderFile();
+    HeaderFile(int fileType = HDRFILE_TYPE_APP);
     //~HeaderFile() {}
     qint32 load(QString fileName);
     qint32 save(QString fileName);
@@ -58,12 +61,16 @@ public:
     bool calHeaderIsValid(QString &msgOutput);
     QByteArray *getSectionDataByName(const QString &name);
     QByteArray getBinData(int type, QString &msgOutput);
+    QByteArray getHdrBinData(int type, QString &msgOutput);
     QByteArray getBinDataWithOutCheck();
     qint64 getHexPartNumber();
+	qint32 loadInfoSection(const QByteArray &ba);
 
+    static QByteArray getBlockHeader(int type);
 	static bool appSWLInfoValidator(const QString fileName, const HFileSection_t *pSc, QString &msgOutput);
 
 	QString m_fileName;
+	int m_fileType;
     QList<HFileSection_t> m_sigSections;
     QList<HFileSection_t> m_infSections;
 

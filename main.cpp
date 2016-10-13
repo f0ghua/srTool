@@ -1,18 +1,65 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QFont>
+#include <QMutex>
 
-static int mainConsole(QApplication &a, int argc, char *argv[]);
+static int mainConsole(QApplication &a, MainWindow &w, int argc, char *argv[]);
+
+/**
+ * Function registed for log to file with qDebug/qWarning/qCritical/qFatal
+ * @param type    [description]
+ * @param context [description]
+ * @param msg     [description]
+ */
+void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    static QMutex mutex;
+    mutex.lock();
+
+    QString text;
+    switch(type)
+    {
+        case QtInfoMsg:
+            text = QString("Info:");
+            break;
+
+        case QtDebugMsg:
+            text = QString("Debug:");
+            break;
+
+        case QtWarningMsg:
+            text = QString("Warning:");
+            break;
+
+        case QtCriticalMsg:
+            text = QString("Critical:");
+            break;
+
+        case QtFatalMsg:
+            text = QString("Fatal:");
+            break;
+    }
+
+    //QString context_info = QString("File:(%1) Line:(%2)").arg(QString(context.file)).arg(context.line);
+    //QString current_date_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
+    //QString current_date = QString("(%1)").arg(current_date_time);
+    //QString message = QString("%1 %2 %3 %4").arg(text).arg(context_info).arg(msg).arg(current_date);
+    QString current_date_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+    QString message = QString("[%1] %2 %3").arg(current_date_time).arg(text).arg(msg);
+
+    QFile file("log.txt");
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream text_stream(&file);
+    text_stream << message.toUtf8().constData() << "\r\n";
+    file.flush();
+    file.close();
+
+    mutex.unlock();
+}
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    if (argc > 1)
-    {
-        mainConsole(a, argc, argv);
-        return 0;
-    }
 
     const QRect ag = QApplication::desktop()->availableGeometry();
     if (ag.width() > 1024) {
@@ -24,7 +71,16 @@ int main(int argc, char *argv[])
     // enable High DPI Support in Qt (seems not work)
     //QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+    qInstallMessageHandler(outputMessage);
+
     MainWindow w;
+
+    if (argc > 1)
+    {
+        mainConsole(a, w, argc, argv);
+        return 0;
+    }
+
     w.show();
 
     return a.exec();
@@ -32,93 +88,29 @@ int main(int argc, char *argv[])
 
 
 #include <QTextStream>
-#include <QCommandLineParser>
 #include <QFile>
 #include <QByteArray>
 
-#include "HeaderFile.h"
-#include "SrecFile.h"
-
-static int mainConsole(QApplication &a, int argc, char *argv[])
+static int mainConsole(QApplication &a, MainWindow &w, int argc, char *argv[])
 {
-	QTextStream out(stdout);
-	QByteArray ba;
+    QString fullFileName = argv[1];
+    QString errMsg;
 
-	QCommandLineOption inOp1(QStringList() << "t" << "header", "Header file with txt format", "file");
-	QCommandLineOption inOp2(QStringList() << "s" << "s19", "S19 file with ascii hex format", "file");
-	QCommandLineOption outOp(QStringList() << "o" << "output", "Write generated binary data into <file>.", "file");
+    if (fullFileName.isEmpty() || (!QFile::exists(fullFileName)))
+        return -1;
 
-	QCommandLineParser parser;
-	parser.addHelpOption();
-	parser.addOption(inOp1);
-	parser.addOption(inOp2);
-	parser.addOption(outOp);
-
-	parser.process(a);
-
-#ifndef F_NO_DEBUG
-	qDebug() << parser.isSet(inOp1);
-	qDebug() << parser.value(inOp1);
-	qDebug() << parser.isSet(inOp2);
-	qDebug() << parser.value(inOp2);
-	qDebug() << parser.isSet(outOp);
-	qDebug() << parser.value(outOp);
-#endif
-
-	QString fileNameHeader = parser.value(inOp1);
-	QString fileNameS19 = parser.value(inOp2);
-
-	if (fileNameHeader.isEmpty() || fileNameS19.isEmpty())
-		return -1;
-
-	if (!QFile::exists(fileNameHeader) || !QFile::exists(fileNameS19))
-		return -1;
-
-	HeaderFile *pHeaderFile = new HeaderFile();
-    if (pHeaderFile->load(fileNameHeader) == -1) {
-    	return -1;
+    if (!w.loadFullFile(fullFileName, errMsg)) {
+        qWarning() << errMsg;
+        return -1;
     }
-
-	SrecFile *pSrecFile = new SrecFile();
-    if (pSrecFile->load(fileNameS19) == -1) {
-    	delete pHeaderFile;
-    	return -1;
+    if (!w.saveBinaryFiles(errMsg)) {
+        qWarning() << errMsg;
+        return -1;
     }
-
-    quint64 v;
-    if ((v = pHeaderFile->getHexPartNumber()) == -1)
-    {
-    	delete pHeaderFile;
-    	delete pSrecFile;
-    	return -1;
-    }
-
-    QString fileNameBin = QString::number(v) + ".bin";
-    QString fileNameHex = QString::number(v) + ".hex";
-
-    QFile *outFile = new QFile(fileNameBin);
-    if (!outFile->open(QIODevice::WriteOnly))
-    {
-    	delete pHeaderFile;
-    	delete pSrecFile;
-        delete outFile;
+    if (!w.saveHexFiles(errMsg)) {
+        qWarning() << errMsg;
         return -1;
     }
 
-    ba = pHeaderFile->getBinDataWithOutCheck();
-    outFile->write(ba);
-
-    for (auto d : pSrecFile->m_dataRecords)
-    {
-        QByteArray &rBa = d.binData;
-        outFile->write(rBa);
-    }
-
-    outFile->close();
-    delete outFile;
-
-    MainWindow::copyFileToPath(pSrecFile->m_fileFullPath, fileNameHex, true);
-
-	return 0;
+    return 0;
 }
-

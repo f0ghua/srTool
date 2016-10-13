@@ -1,0 +1,2 @@
+- Add support for Hex File 0101 header add option
+- Add configure support for parameters

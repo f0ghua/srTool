@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>480</height>
+    <height>466</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
            <x>0</x>
            <y>0</y>
            <width>600</width>
-           <height>434</height>
+           <height>488</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout">
@@ -214,302 +214,448 @@
                    <property name="title">
                     <string>App SW Location Info</string>
                    </property>
-                   <layout class="QGridLayout" name="gridLayout_13">
-                    <property name="leftMargin">
-                     <number>9</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>9</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>9</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>9</number>
-                    </property>
+                   <layout class="QGridLayout" name="gridLayout_5">
                     <item row="0" column="0">
-                     <layout class="QGridLayout" name="gridLayout_12" rowstretch="1,1,1">
-                      <property name="verticalSpacing">
+                     <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="2,1,1,1,1,1,1,1,1">
+                      <property name="spacing">
                        <number>6</number>
                       </property>
-                      <item row="0" column="0">
-                       <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="2,1,1,1,1,1,1,1,1">
-                        <property name="spacing">
-                         <number>6</number>
+                      <item>
+                       <widget class="QComboBox" name="m_cbASLInfoSub0">
+                        <item>
+                         <property name="text">
+                          <string>00 01</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>00 02</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>00 03</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>00 04</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_26">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
                         </property>
-                        <item>
-                         <widget class="QComboBox" name="m_cbASLInfoSub0">
-                          <item>
-                           <property name="text">
-                            <string>00 01</string>
-                           </property>
-                          </item>
-                          <item>
-                           <property name="text">
-                            <string>00 02</string>
-                           </property>
-                          </item>
-                         </widget>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_26">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>18</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_33">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>18</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_32">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>18</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_27">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>13</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_28">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>18</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_29">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>18</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_30">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>18</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                        <item>
-                         <spacer name="horizontalSpacer_31">
-                          <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                          </property>
-                          <property name="sizeHint" stdset="0">
-                           <size>
-                            <width>18</width>
-                            <height>20</height>
-                           </size>
-                          </property>
-                         </spacer>
-                        </item>
-                       </layout>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>18</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
                       </item>
-                      <item row="1" column="0">
-                       <widget class="QWidget" name="m_wgASLInfoSub1" native="true">
-                        <layout class="QGridLayout" name="gridLayout_7">
-                         <property name="leftMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="topMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="rightMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="bottomMargin">
-                          <number>0</number>
-                         </property>
-                         <item row="0" column="0">
-                          <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="1,1,1,1,1,1,1,1,1,1">
-                           <property name="spacing">
-                            <number>6</number>
-                           </property>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB2"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB3"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB4"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB5"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB6"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB7"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB8"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB9"/>
-                           </item>
-                           <item>
-                            <spacer name="horizontalSpacer_35">
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                             <property name="sizeHint" stdset="0">
-                              <size>
-                               <width>18</width>
-                               <height>20</height>
-                              </size>
-                             </property>
-                            </spacer>
-                           </item>
-                           <item>
-                            <spacer name="horizontalSpacer_34">
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                             <property name="sizeHint" stdset="0">
-                              <size>
-                               <width>18</width>
-                               <height>20</height>
-                              </size>
-                             </property>
-                            </spacer>
-                           </item>
-                          </layout>
-                         </item>
-                        </layout>
-                       </widget>
+                      <item>
+                       <spacer name="horizontalSpacer_33">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>18</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
                       </item>
-                      <item row="2" column="0">
-                       <widget class="QWidget" name="m_wgASLInfoSub2" native="true">
-                        <layout class="QGridLayout" name="gridLayout_8">
-                         <property name="leftMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="topMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="rightMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="bottomMargin">
-                          <number>0</number>
-                         </property>
-                         <item row="0" column="0">
-                          <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="1,1,1,1,1,1,1,1,1,1">
-                           <property name="spacing">
-                            <number>6</number>
-                           </property>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB10"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB11"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB12"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB13"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB14"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB15"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB16"/>
-                           </item>
-                           <item>
-                            <widget class="QLineEdit" name="m_leASLInfoB17"/>
-                           </item>
-                           <item>
-                            <spacer name="horizontalSpacer_36">
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                             <property name="sizeHint" stdset="0">
-                              <size>
-                               <width>18</width>
-                               <height>20</height>
-                              </size>
-                             </property>
-                            </spacer>
-                           </item>
-                           <item>
-                            <spacer name="horizontalSpacer_37">
-                             <property name="orientation">
-                              <enum>Qt::Horizontal</enum>
-                             </property>
-                             <property name="sizeHint" stdset="0">
-                              <size>
-                               <width>18</width>
-                               <height>20</height>
-                              </size>
-                             </property>
-                            </spacer>
-                           </item>
-                          </layout>
-                         </item>
-                        </layout>
-                       </widget>
+                      <item>
+                       <spacer name="horizontalSpacer_32">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>18</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_27">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>13</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_28">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>18</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_29">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>18</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_30">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>18</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_31">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>18</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
                       </item>
                      </layout>
                     </item>
+                    <item row="1" column="0">
+                     <widget class="QWidget" name="m_wgASLInfoSub1" native="true">
+                      <layout class="QGridLayout" name="gridLayout_7">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item row="0" column="0">
+                        <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="1,1,1,1,1,1,1,1,1,1">
+                         <property name="spacing">
+                          <number>6</number>
+                         </property>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB2"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB3"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB4"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB5"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB6"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB7"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB8"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB9"/>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_35">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_34">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QWidget" name="m_wgASLInfoSub2" native="true">
+                      <layout class="QGridLayout" name="gridLayout_8">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item row="0" column="0">
+                        <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="1,1,1,1,1,1,1,1,1,1">
+                         <property name="spacing">
+                          <number>6</number>
+                         </property>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB10"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB11"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB12"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB13"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB14"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB15"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB16"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB17"/>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_36">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_37">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QWidget" name="m_wgASLInfoSub3" native="true">
+                      <layout class="QGridLayout" name="gridLayout_11">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item row="0" column="0">
+                        <layout class="QHBoxLayout" name="horizontalLayout_25" stretch="1,1,1,1,1,1,1,1,1,1">
+                         <property name="spacing">
+                          <number>6</number>
+                         </property>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB18"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB19"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB20"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB21"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB22"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB23"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB24"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB25"/>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_40">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_41">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QWidget" name="m_wgASLInfoSub4" native="true">
+                      <layout class="QGridLayout" name="gridLayout_12">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item row="0" column="0">
+                        <layout class="QHBoxLayout" name="horizontalLayout_26" stretch="1,1,1,1,1,1,1,1,1,1">
+                         <property name="spacing">
+                          <number>6</number>
+                         </property>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB26"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB27"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB28"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB29"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB30"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB31"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB32"/>
+                         </item>
+                         <item>
+                          <widget class="QLineEdit" name="m_leASLInfoB33"/>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_42">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_43">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>18</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
                    </layout>
+                   <zorder>m_wgASLInfoSub2</zorder>
+                   <zorder></zorder>
+                   <zorder>m_wgASLInfoSub1</zorder>
+                   <zorder>m_wgASLInfoSub3</zorder>
+                   <zorder>m_wgASLInfoSub4</zorder>
                   </widget>
                  </item>
                 </layout>
@@ -933,9 +1079,8 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionLoad_App_Srec_File"/>
-    <addaction name="actionLoad_Cal1_Srec_File"/>
-    <addaction name="actionLoad_Cal2_Srec_File"/>
+    <addaction name="actionLoad_S19_File"/>
+    <addaction name="separator"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -945,7 +1090,22 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuTool">
+    <property name="title">
+     <string>Tool</string>
+    </property>
+    <widget class="QMenu" name="menuExtract_Header">
+     <property name="title">
+      <string>Extract Header</string>
+     </property>
+     <addaction name="actionExtract_App_Header"/>
+     <addaction name="actionExtract_Cal1_Header"/>
+     <addaction name="actionExtract_Cal2_Header"/>
+    </widget>
+    <addaction name="menuExtract_Header"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuTool"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -956,30 +1116,35 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionReLoad"/>
-   <addaction name="actionLoad_App_Srec_File"/>
-   <addaction name="actionLoad_Cal1_Srec_File"/>
-   <addaction name="actionLoad_Cal2_Srec_File"/>
+   <addaction name="actionLoad_S19_File"/>
+   <addaction name="separator"/>
+   <addaction name="actionExtract_App_Header"/>
+   <addaction name="actionExtract_Cal1_Header"/>
+   <addaction name="actionExtract_Cal2_Header"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
   </widget>
-  <action name="actionLoad_App_Srec_File">
+  <action name="actionExtract_App_Header">
    <property name="icon">
     <iconset resource="sctool.qrc">
-     <normaloff>:/menuOpenApp</normaloff>:/menuOpenApp</iconset>
+     <normaloff>:/menuSaveHdrApp</normaloff>:/menuSaveHdrApp</iconset>
    </property>
    <property name="text">
-    <string>Load App Srec File</string>
+    <string>From App Binary</string>
    </property>
    <property name="toolTip">
-    <string>Load App Srec File</string>
+    <string>Extract Header from App Bin File</string>
    </property>
   </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -999,22 +1164,48 @@
     <string>ReLoad App Header File</string>
    </property>
   </action>
-  <action name="actionLoad_Cal1_Srec_File">
+  <action name="actionExtract_Cal1_Header">
    <property name="icon">
     <iconset resource="sctool.qrc">
-     <normaloff>:/menuOpenCal</normaloff>:/menuOpenCal</iconset>
+     <normaloff>:/menuSaveHdrCal1</normaloff>:/menuSaveHdrCal1</iconset>
    </property>
    <property name="text">
-    <string>Load Cal1 Srec File</string>
+    <string>From Cal1 Binary</string>
+   </property>
+   <property name="toolTip">
+    <string>Extract Header from Cal1 Bin File</string>
    </property>
   </action>
-  <action name="actionLoad_Cal2_Srec_File">
+  <action name="actionExtract_Cal2_Header">
    <property name="icon">
     <iconset resource="sctool.qrc">
-     <normaloff>:/menuOpenCal</normaloff>:/menuOpenCal</iconset>
+     <normaloff>:/menuSaveHdrCal2</normaloff>:/menuSaveHdrCal2</iconset>
    </property>
    <property name="text">
-    <string>Load Cal2 Srec File</string>
+    <string>From Cal2 Binary</string>
+   </property>
+   <property name="toolTip">
+    <string>Extract Header from Cal2 Bin File</string>
+   </property>
+  </action>
+  <action name="actionLoad_S19_File">
+   <property name="icon">
+    <iconset resource="sctool.qrc">
+     <normaloff>:/menuOpenFull</normaloff>:/menuOpenFull</iconset>
+   </property>
+   <property name="text">
+    <string>Load S19 File</string>
+   </property>
+   <property name="toolTip">
+    <string>Load Full Content S19 File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionFrom_APPL_Binary">
+   <property name="text">
+    <string>From APPL Binary</string>
    </property>
   </action>
  </widget>

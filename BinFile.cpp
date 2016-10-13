@@ -33,22 +33,28 @@ qint32 BinFile::load(QString fileName, int type)
     QFileInfo fileinfo = QFileInfo(fileName);
     m_fileName = fileinfo.fileName();
 
-    QFile *inFile = new QFile(fileName);
-    if (!inFile->open(QIODevice::ReadOnly))
-    {
-        delete inFile;
-        return -1;
-    }
-
     if (type == HDRFILE_TYPE_APP)
     {
+        if (fileinfo.size() < MIN_APPHDR_SIZE) {
+            return -1;
+        }
         arrayMapping = &g_appSectionMapping[0];
         arrayLen = HDRFILE_APP_SECTIONS;
     }
     else
     {
+        if (fileinfo.size() < MIN_CALHDR_SIZE) {
+            return -1;
+        }
         arrayMapping = &g_calSectionMapping[0];
         arrayLen = HDRFILE_CAL_SECTIONS;
+    }
+
+    QFile *inFile = new QFile(fileName);
+    if (!inFile->open(QIODevice::ReadOnly))
+    {
+        delete inFile;
+        return -1;
     }
 
     QList<HFileSection_t> &lsigSections = m_pHeaderFile->m_sigSections;

@@ -137,7 +137,7 @@ bool SrecFile::parseLine(QString &line, int lineNumber)
             sd.binData = ba.mid(1+sd.addressLen,
                 ba.count()-BIN_COUNT_LENGTH-sd.addressLen-BIN_CKSUM_LENGTH);
 
-            m_dataRecords.insert(lineNumber, sd);
+            m_dataRecords.insert(sd.address, sd);
             break;
         }
         default:
@@ -147,4 +147,42 @@ bool SrecFile::parseLine(QString &line, int lineNumber)
     sd.hexData = line;
 
     return true;
+}
+
+QByteArray SrecFile::getBinData(quint32 startAddress, int len)
+{
+    QMap<quint32, SrecordData_t>::const_iterator ci;
+    QByteArray ba;
+
+    for (ci = m_dataRecords.constBegin();
+        ci != m_dataRecords.constEnd();
+        ci++) {
+        if ((ci.key() <=  startAddress) &&
+            ((ci.key() + ci.value().binData.size()) > startAddress))
+        {
+            break;
+        }
+    }
+
+    if (ci == m_dataRecords.constEnd())
+        return QByteArray();
+
+    ba.reserve(len);
+    int delta = startAddress - ci.key();
+    int cpLen = ci.value().binData.size() - delta;
+    int tlen = len;
+    ba += ci.value().binData.mid(delta, cpLen);
+    tlen -= cpLen;
+    ci++;
+    while ((ci != m_dataRecords.constEnd()) && (tlen > 0)) {
+        cpLen = (tlen > ci.value().binData.size())?ci.value().binData.size():tlen;
+        ba += ci.value().binData.mid(0, cpLen);
+        tlen -= cpLen;
+        ci++;
+    }
+
+    if (ba.size() != len)
+        return QByteArray();
+
+    return ba;
 }

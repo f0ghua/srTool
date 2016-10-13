@@ -36,6 +36,7 @@ public:
     SrecFile();
     SrecFile(QString fileName);
     qint32 load(QString fileName);
+    QByteArray getBinData(quint32 startAddress, int len);
 
     QString m_fileFullPath;
     QString m_fileName;

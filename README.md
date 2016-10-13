@@ -15,3 +15,4 @@ The hex file(Motorola S-record) use ASCII to display the binary value, e.g. bina
 - [s19tobin](https://github.com/rururutan/s19tobin)
 - [bin2s19](https://github.com/DougBarry/Bin2S19/blob/master/bin2s19.cpp)
 - [SRecordizer](http://srecordizer.codeplex.com/SourceControl/latest#SRecordizer/Objects/S19.cs)
+- [bin2hex](https://github.com/krupski/bin2hex/blob/master/bin2hex.cpp)

@@ -23,15 +23,20 @@ SOURCES += main.cpp\
     SrecFile.cpp \
     Utility.cpp \
     HeaderFile.cpp \
-    BinFile.cpp
+    BinFile.cpp \
+    IHexFile.cpp \
+    AboutDialog.cpp
 
 HEADERS  += mainwindow.h \
     SrecFile.h \
     Utility.h \
     HeaderFile.h \
-    BinFile.h
+    BinFile.h \
+    IHexFile.h \
+    AboutDialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    AboutDialog.ui
 
 RESOURCES += \
     sctool.qrc
