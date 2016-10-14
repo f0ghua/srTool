@@ -55,7 +55,7 @@
           <string notr="true"/>
          </property>
          <property name="pixmap">
-          <pixmap resource="sctool.qrc">:/iconToolX</pixmap>
+          <pixmap resource="sctool.qrc">:/iconToolAbout</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -91,7 +91,7 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(120, 120, 120);</string>
+        <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
         <string>Motorola S19 Splite Tool</string>
@@ -176,7 +176,7 @@
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(120, 120, 120);</string>
+          <string notr="true">color: rgb(0, 0, 0);</string>
          </property>
          <property name="text">
           <string>Description</string>
@@ -206,7 +206,7 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(120, 120, 120);</string>
+        <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
         <string>This tool is used to splite a motorola s19 file to binary files
@@ -250,7 +250,7 @@
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(120, 120, 120);</string>
+          <string notr="true">color: rgb(0, 0, 0);</string>
          </property>
          <property name="text">
           <string>About Author</string>
@@ -280,10 +280,10 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: rgb(120, 120, 120);</string>
+        <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Copy Right: </string>
+        <string>Copy Right: 2016 ~ 2020</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

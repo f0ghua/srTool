@@ -14,5 +14,6 @@
         <file alias="iconToolX">images/scTool_x.svg</file>
         <file alias="configLayout">images/x64x64_control-center2.png</file>
         <file alias="configProperty">images/x64x64_gnome-html.png</file>
+        <file alias="iconToolAbout">images/srTool_64x64.png</file>
     </qresource>
 </RCC>
