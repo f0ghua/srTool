@@ -25,7 +25,9 @@ SOURCES += main.cpp\
     HeaderFile.cpp \
     BinFile.cpp \
     IHexFile.cpp \
-    AboutDialog.cpp
+    AboutDialog.cpp \
+    ConfigDialog.cpp \
+    SrConfig.cpp
 
 HEADERS  += mainwindow.h \
     SrecFile.h \
@@ -33,10 +35,13 @@ HEADERS  += mainwindow.h \
     HeaderFile.h \
     BinFile.h \
     IHexFile.h \
-    AboutDialog.h
+    AboutDialog.h \
+    ConfigDialog.h \
+    SrConfig.h
 
 FORMS    += mainwindow.ui \
-    AboutDialog.ui
+    AboutDialog.ui \
+    ConfigDialog.ui
 
 RESOURCES += \
     sctool.qrc

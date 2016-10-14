@@ -9,6 +9,7 @@
 #include "BinFile.h"
 #include "IHexFile.h"
 #include "AboutDialog.h"
+#include "ConfigDialog.h"
 
 #define FILENAME_APP_SIGNED_HEADER      "AppHeaderForGeneration.txt"
 #define FILENAME_CAL1_SIGNED_HEADER     "Cal1HeaderForGeneration.txt"
@@ -47,6 +48,8 @@ private slots:
     void on_actionExtract_Cal1_Header_triggered();
     void on_actionExtract_Cal2_Header_triggered();
 
+    void on_actionPreferences_triggered();
+
 private:
     Ui::MainWindow *ui;
     QList<QLineEdit *> m_listAppDLS;
@@ -63,6 +66,7 @@ private:
     QList<QLineEdit *> m_listCal2HPN;
     QList<QLineEdit *> m_listCal2CCID;
     AboutDialog *m_aboutDialog;
+    ConfigDialog *m_configDialog;
 
     QMap<QString, QString> m_parameters;
     HeaderFile *m_pAppHeaderFile;
@@ -92,6 +96,7 @@ private:
     int updateCal2HeaderFile();
     void messageBoxAlert(QString s);
     void updateTableView();
+    void readConfigSettings();
 };
 
 #endif // MAINWINDOW_H

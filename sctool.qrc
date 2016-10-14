@@ -12,5 +12,7 @@
         <file alias="menuSaveHdrCal2">images/tb_save_cal2.png</file>
         <file alias="iconTool">images/scTool_32x32.png</file>
         <file alias="iconToolX">images/scTool_x.svg</file>
+        <file alias="configLayout">images/x64x64_control-center2.png</file>
+        <file alias="configProperty">images/x64x64_gnome-html.png</file>
     </qresource>
 </RCC>

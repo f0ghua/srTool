@@ -1104,8 +1104,15 @@
     </widget>
     <addaction name="menuExtract_Header"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Option</string>
+    </property>
+    <addaction name="actionPreferences"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTool"/>
+   <addaction name="menuOptions"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -1158,10 +1165,10 @@
      <normaloff>:/menuReload</normaloff>:/menuReload</iconset>
    </property>
    <property name="text">
-    <string>ReLoad App Header File</string>
+    <string>ReLoad Header Files</string>
    </property>
    <property name="toolTip">
-    <string>ReLoad App Header File</string>
+    <string>ReLoad Header Files</string>
    </property>
   </action>
   <action name="actionExtract_Cal1_Header">
@@ -1206,6 +1213,11 @@
   <action name="actionFrom_APPL_Binary">
    <property name="text">
     <string>From APPL Binary</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>

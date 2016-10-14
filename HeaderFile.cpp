@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <QTime>
 
-//#define F_NO_DEBUG
+#define F_NO_DEBUG
 
 #define CH_COMMENT_INDICATOR "#"
 #define CH_SIGNAME_INDICATOR "@"	// signed header

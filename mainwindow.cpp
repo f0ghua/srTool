@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "Utility.h"
+#include "SrConfig.h"
 
 #include <QDesktopWidget>
 #include <QFileDialog>
@@ -32,22 +33,6 @@
         ba.append((char)(l).at(i)->text().toUInt(&ok, 16)); \
     } \
     if (a) (*a) = ba;
-
-
-const static QStringList g_addrAttributeList = {
-    "ADDR_APPL_SWINFO",
-    "SIZE_APPL_SWINFO",
-    "ADDR_APPL_BLOCK",
-    "SIZE_APPL_BLOCK",
-    "ADDR_CAL1_DATAINFO",
-    "SIZE_CAL1_DATAINFO",
-    "ADDR_CAL1_BLOCK",
-    "SIZE_CAL1_BLOCK",
-    "ADDR_CAL2_DATAINFO",
-    "SIZE_CAL2_DATAINFO",
-    "ADDR_CAL2_BLOCK",
-    "SIZE_CAL2_BLOCK"
-};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -122,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QList<QLineEdit *> l = wd->findChildren<QLineEdit *>();
         m_listAppASLInfo.append(l);
     }
-#ifndef F_NO_DEBUG
+#if 0//ndef F_NO_DEBUG
     for (int i = 0; i < m_listAppASLInfo.count(); i++)
     {
         qDebug() << m_listAppASLInfo.at(i)->objectName();
@@ -181,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pCal1BinFile = new BinFile(m_pCal1HeaderFile, m_pCal1SrecordFile);
     m_pCal2BinFile = new BinFile(m_pCal2HeaderFile, m_pCal2SrecordFile);
 
+#if 0
     // set default values
     m_parameters["ADDR_APPL_SWINFO"]    = "0x00010000";
     m_parameters["SIZE_APPL_SWINFO"]    = "0x200";
@@ -197,15 +183,15 @@ MainWindow::MainWindow(QWidget *parent) :
     m_parameters["ADDR_CAL2_BLOCK"]     = "0x00000020";
     m_parameters["SIZE_CAL2_BLOCK"]     = "0x7FD8";
 
-    // load settings from setting file
+    m_parameters["HEX_HEADER_ENABLE"]   = "0x00";
+#endif
 
-    foreach (const QString &s, g_addrAttributeList) {
-        bool ok;
-        quint32 v = m_parameters[s].toULong(&ok, 16);
-        if (!ok) {
-            messageBoxAlert(tr("%1 value is not correct").arg(s));
-            return;
-        }
+    // load settings from setting file
+    SrConfig::readConfigSettings(m_parameters);
+
+    if (!SrConfig::validConfigSettings(m_parameters)) {
+        messageBoxAlert(tr("config value is not correct, please correct it"));
+        close();
     }
 
     on_actionReLoad_triggered();
@@ -351,7 +337,7 @@ int MainWindow::loadCal2HeaderFile()
     	return -1;
     }
 
-#ifndef F_NO_DEBUG
+#if 0//ndef F_NO_DEBUG
     for (int i = 0; i < m_pCal2HeaderFile->m_sigSections.count(); i++)
     {
     	qDebug() << "section: " << m_pCal2HeaderFile->m_sigSections[i].name;
@@ -593,7 +579,7 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 
 bool MainWindow::saveHexFiles(QString &outMsg)
 {
-    QByteArray ba;
+    QByteArray ba, baHeader;
     qint64 v;
     quint32 baseAddr;
     bool ok;
@@ -603,13 +589,17 @@ bool MainWindow::saveHexFiles(QString &outMsg)
         return false;
     }
 
+    if (m_parameters["HEX_HEADER_ENABLE"].toInt(&ok, 16)) {
+        baHeader = HeaderFile::getBlockHeader(SECTION_INFO);
+    }
+
     QString fileNameAppHex("APP.hex");
     if ((v = m_pAppHeaderFile->getHexPartNumber()) != -1)
     {
         fileNameAppHex = QString::number(v) + ".hex";
     }
     ba.clear();
-    ba = m_baAppInfo + m_baAppBlock;
+    ba = baHeader + m_baAppInfo + m_baAppBlock;
     baseAddr = m_parameters["ADDR_APPL_SWINFO"].toULong(&ok, 16);
     IHexFile::saveFileFromByteArray(ba, fileNameAppHex, baseAddr, IHEXFILE_HEX86);
 
@@ -621,7 +611,7 @@ bool MainWindow::saveHexFiles(QString &outMsg)
         fileNameCal1Hex = QString::number(v) + ".hex";
     }
     ba.clear();
-    ba = m_baCal1Info + m_baCal1Block;
+    ba = baHeader + m_baCal1Info + m_baCal1Block;
     baseAddr = m_parameters["ADDR_CAL1_DATAINFO"].toULong(&ok, 16);
     IHexFile::saveFileFromByteArray(ba, fileNameCal1Hex, baseAddr, IHEXFILE_HEX86);
 
@@ -633,7 +623,7 @@ bool MainWindow::saveHexFiles(QString &outMsg)
         fileNameCal2Hex = QString::number(v) + ".hex";
     }
     ba.clear();
-    ba = m_baCal2Info + m_baCal2Block;
+    ba = baHeader + m_baCal2Info + m_baCal2Block;
     baseAddr = m_parameters["ADDR_CAL2_DATAINFO"].toULong(&ok, 16);
     IHexFile::saveFileFromByteArray(ba, fileNameCal2Hex, baseAddr, IHEXFILE_HEX86);
 
@@ -1072,4 +1062,10 @@ void MainWindow::on_actionExtract_Cal2_Header_triggered()
     pHeaderFile->save(FILENAME_EXTRACT_HDR_CAL2);
 
     statusBar()->showMessage(tr("CAL2 header has saved to %1.").arg(FILENAME_EXTRACT_HDR_CAL2), 2000);
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    m_configDialog = new ConfigDialog(&m_parameters, this);
+    m_configDialog->show();
 }
