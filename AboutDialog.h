@@ -2,10 +2,7 @@
 #define ABOUTDIALOG_H
 
 #include <QDialog>
-
-namespace Ui {
-class AboutDialog;
-}
+#include <QtWidgets>
 
 class AboutDialog : public QDialog
 {
@@ -16,7 +13,20 @@ public:
     ~AboutDialog();
 
 private:
-    Ui::AboutDialog *ui;
+	QGridLayout *m_gridLayout;
+	QHBoxLayout *m_horizontalLayout;
+
+	QSpacerItem *m_horizontalSpacer1;
+	QLabel *m_labelLogo;
+	QPixmap *m_logo;
+	QSpacerItem *m_horizontalSpacer2;
+	QLabel *m_labelBasicInfo;
+	QGroupBox *m_gbOptInfo1;
+	QGridLayout *m_gridLayoutOptInfo1;
+	QLabel *m_labelOptInfo1;
+	QGroupBox *m_gbOptInfo2;
+	QGridLayout *m_gridLayoutOptInfo2;
+	QLabel *m_labelOptInfo2;
 };
 
 #endif // ABOUTDIALOG_H

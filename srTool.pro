@@ -40,7 +40,6 @@ HEADERS  += mainwindow.h \
     SrConfig.h
 
 FORMS    += mainwindow.ui \
-    AboutDialog.ui \
     ConfigDialog.ui
 
 RESOURCES += \
