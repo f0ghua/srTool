@@ -3,6 +3,8 @@
 #define APP_NAME 	"Motorola S19 Split Tool"
 #define APP_VERSION	"1.2.02"
 
+extern double g_dpiScaleValue;
+
 /**
 
 - QGridLayout
@@ -93,6 +95,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
 	m_gridLayout->setRowStretch(1, 1);
 	m_gridLayout->setRowStretch(1, 1);
 
+	resize(width()*g_dpiScaleValue, height()*g_dpiScaleValue);
 	//show();
 }
 

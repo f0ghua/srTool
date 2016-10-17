@@ -11,12 +11,12 @@
 #include <QTextBlock>
 #include <QRegExp>
 #include <QIcon>
+#include <QDebug>
 
 //#define F_NO_DEBUG
 
 #ifndef F_NO_DEBUG
 #include <QTime>
-#include <QDebug>
 #endif
 
 #define LISTWIDGET_SETTEXT(l, a) \
@@ -33,6 +33,8 @@
         ba.append((char)(l).at(i)->text().toUInt(&ok, 16)); \
     } \
     if (a) (*a) = ba;
+
+extern double g_dpiScaleValue;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -51,6 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qint32 w = ag.width() * 2 / 3;
     resize(w , w * 3 / 4);
 */
+    resize(width()*g_dpiScaleValue, height()*g_dpiScaleValue);
+
     QGroupBox *gb;
     gb = this->findChild<QGroupBox *>("m_gbAppDLS");
     if (gb != NULL)

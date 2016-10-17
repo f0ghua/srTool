@@ -4,13 +4,16 @@
 
 #include <QSettings>
 
+extern double g_dpiScaleValue;
+
 ConfigDialog::ConfigDialog(QMap<QString, QString> *pParameters, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConfigDialog)
 {
     ui->setupUi(this);
-    m_pParameters = pParameters;
+    resize(width()*g_dpiScaleValue, height()*g_dpiScaleValue);
 
+    m_pParameters = pParameters;
     loadParameters();
 }
 
@@ -74,12 +77,12 @@ void ConfigDialog::saveConfigParameters()
     (*m_pParameters)["ADDR_CAL1_DATAINFO"] = ui->m_leCal1InfoAddr->text();
     (*m_pParameters)["SIZE_CAL1_DATAINFO"] = ui->m_leCal1InfoSize->text();
     (*m_pParameters)["ADDR_CAL1_BLOCK"] = ui->m_leCal1BlockAddr->text();
-    (*m_pParameters)["SIZE_CAL1_BLOCK"] = ui->m_leCal1BlockSize->text();    
+    (*m_pParameters)["SIZE_CAL1_BLOCK"] = ui->m_leCal1BlockSize->text();
 
     (*m_pParameters)["ADDR_CAL2_DATAINFO"] = ui->m_leCal2InfoAddr->text();
     (*m_pParameters)["SIZE_CAL2_DATAINFO"] = ui->m_leCal2InfoSize->text();
     (*m_pParameters)["ADDR_CAL2_BLOCK"] = ui->m_leCal2BlockAddr->text();
-    (*m_pParameters)["SIZE_CAL2_BLOCK"] = ui->m_leCal2BlockSize->text();  
+    (*m_pParameters)["SIZE_CAL2_BLOCK"] = ui->m_leCal2BlockSize->text();
 
     (*m_pParameters)["HEX_HEADER_ENABLE"] = ui->m_ckbHexHeader->isChecked()?"1":"0";
 

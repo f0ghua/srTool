@@ -3,6 +3,8 @@
 #include <QFont>
 #include <QMutex>
 
+double g_dpiScaleValue = 1;
+
 static int mainConsole(QApplication &a, MainWindow &w, int argc, char *argv[]);
 
 /**
@@ -59,19 +61,17 @@ void outputMessage(QtMsgType type, const QMessageLogContext &context, const QStr
 
 int main(int argc, char *argv[])
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif // QT_VERSION
+
     QApplication a(argc, argv);
-
-    const QRect ag = QApplication::desktop()->availableGeometry();
-    if (ag.width() > 1024) {
-    	QFont font = a.font();
-    	font.setPointSize(10);
-    	a.setFont(font);
-    }
-
-    // enable High DPI Support in Qt (seems not work)
-    //QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
     qInstallMessageHandler(outputMessage);
+
+    QScreen *screen = a.primaryScreen();
+    g_dpiScaleValue = (double)screen->logicalDotsPerInch()/96;
+    QFont font = a.font();
+    font.setPointSize(9*g_dpiScaleValue);
 
     MainWindow w;
 
