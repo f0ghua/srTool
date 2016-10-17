@@ -93,7 +93,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
 	m_gridLayout->setRowStretch(1, 1);
 	m_gridLayout->setRowStretch(1, 1);
 
-	show();
+	//show();
 }
 
 AboutDialog::~AboutDialog()
