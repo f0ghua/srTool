@@ -66,7 +66,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
 	m_labelOptInfo1->setWordWrap(true);
 	m_labelOptInfo1->setAlignment(Qt::AlignHCenter|Qt::AlignTop);
 	m_labelOptInfo1->setText(tr(
-		"This tool is used to split a motorola s19 file to binary files and correspoding intel hex files."
+		"This tool is used to split a motorola s19 file to binary files and corresponding intel hex files."
 		)
 		);
 	m_gridLayoutOptInfo1->addWidget(m_labelOptInfo1, 0, 0, 1, 1);
