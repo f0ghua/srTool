@@ -18,6 +18,8 @@
 
 #define MIN_APPHDR_SIZE				(866 + 0x200)
 #define MIN_CALHDR_SIZE				(854 + 0x20)
+#define MIN_APPINFO_SIZE			76
+#define MIN_CALINFO_SIZE			14
 #define SECTION_SIGNEDHDR			0
 #define SECTION_INFO				1
 
@@ -28,6 +30,11 @@
 #define HDRFILE_TYPE_CAL			1
 
 #define ARRAY_SIZE(x) sizeof((x))/sizeof((x)[0])
+
+struct BlockInfo_t {
+	quint32 addr;
+	quint32 size;
+};
 
 struct HFileSection_t {
 	QString name;
@@ -65,6 +72,7 @@ public:
     QByteArray getBinDataWithOutCheck();
     qint64 getHexPartNumber();
 	qint32 loadInfoSection(const QByteArray &ba);
+	QList<BlockInfo_t> appBlockInfo() {return m_appBlockInfo;}
 
     static QByteArray getBlockHeader(int type);
 	static bool appSWLInfoValidator(const QString fileName, const HFileSection_t *pSc, QString &msgOutput);
@@ -73,11 +81,13 @@ public:
 	int m_fileType;
     QList<HFileSection_t> m_sigSections;
     QList<HFileSection_t> m_infSections;
+    QList<BlockInfo_t> m_appBlockInfo;
 
 private:
 	int indexOfSection(const QString &sectionName, const QList<HFileSection_t> &sections);
 	bool isHeaderValid(const SecHelper_t *pSvl, int len, QString &msgOutput);
 	bool isSectionsValid(const QList<HFileSection_t> &sections, const SecHelper_t *pSvl, int len, QString &msgOutput);
+	void getAppBlockInfo(QList<BlockInfo_t> &bl);
 };
 
 #endif // HEADERFILE_H

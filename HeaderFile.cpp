@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <QTime>
 
-#define F_NO_DEBUG
+//#define F_NO_DEBUG
 
 #define CH_COMMENT_INDICATOR "#"
 #define CH_SIGNAME_INDICATOR "@"	// signed header
@@ -79,7 +79,8 @@ const SecHelper_t g_calSectionMapping[HDRFILE_CAL_SECTIONS] = {
 HeaderFile::HeaderFile(int fileType) :
 	m_fileName(),
 	m_fileType(fileType),
-	m_sigSections()
+	m_sigSections(),
+	m_appBlockInfo()
 {
 
 }
@@ -164,7 +165,7 @@ qint32 HeaderFile::load(QString fileName)
         		section.name = line.mid(0, chEnd+1);
         		lastSectionType = SECTION_SIGNEDHDR;
         	}
-#ifndef F_NO_DEBUG
+#if 0//ndef F_NO_DEBUG
         	qDebug() << "processing section " << section.name;
 #endif
         }
@@ -177,7 +178,7 @@ qint32 HeaderFile::load(QString fileName)
         		section.name = line.mid(0, chEnd+1);
         		lastSectionType = SECTION_INFO;
         	}
-#ifndef F_NO_DEBUG
+#if 0//ndef F_NO_DEBUG
         	qDebug() << "processing section " << section.name;
 #endif
         }
@@ -186,7 +187,7 @@ qint32 HeaderFile::load(QString fileName)
         	line.remove(" ");
         	if (!line.isEmpty()) {
         		section.data += QByteArray::fromHex(line.toLatin1());
-#ifndef F_NO_DEBUG
+#if 0//ndef F_NO_DEBUG
         	qDebug() << "append data " << QByteArray::fromHex(line.toLatin1());
 #endif
         	}
@@ -207,6 +208,9 @@ qint32 HeaderFile::load(QString fileName)
     inFile->close();
     delete inFile;
 
+    // update app block info if there it is
+    getAppBlockInfo(m_appBlockInfo);
+
 	return 0;
 }
 
@@ -218,9 +222,15 @@ qint32 HeaderFile::loadInfoSection(const QByteArray &ba)
     if (m_fileType == HDRFILE_TYPE_APP) {
         arrayMapping = &g_appSectionMapping[0];
         arrayLen = HDRFILE_APP_SECTIONS;
+        if (ba.size() < MIN_APPINFO_SIZE) {
+        	return -1;
+        }
     } else {
         arrayMapping = &g_calSectionMapping[0];
         arrayLen = HDRFILE_CAL_SECTIONS;
+        if (ba.size() < MIN_CALINFO_SIZE) {
+        	return -1;
+        }
     }
 
     QList<HFileSection_t> &linfSections = this->m_infSections;
@@ -254,8 +264,16 @@ qint32 HeaderFile::loadInfoSection(const QByteArray &ba)
         }
     }
 
+#ifndef F_NO_DEBUG
+    qDebug() << tr("pos = %1, ba.size() = %2").arg(pos).arg(ba.size());
+#endif
+    /*
     if (pos != ba.size())
     	return -1;
+	*/
+
+    // update app block info if there it is
+    getAppBlockInfo(m_appBlockInfo);
 
     return 0;
 }
@@ -525,4 +543,37 @@ bool HeaderFile::calHeaderIsValid(QString &msgOutput)
 	return isHeaderValid(&g_calSectionMapping[0],
 		ARRAY_SIZE(g_calSectionMapping),
 		msgOutput);
+}
+
+void HeaderFile::getAppBlockInfo(QList<BlockInfo_t> &bl)
+{
+	bl.clear();
+
+	QByteArray *pBa = getSectionDataByName("$App SW Location Info$");
+	if (pBa) {
+		// first 2 byte means count
+		int blockNumber = pBa->at(1);
+#ifndef F_NO_DEBUG
+		qDebug() << "blockNumber = " << blockNumber;
+#endif
+		for (int i = 0; i < blockNumber; i++) {
+			int start = 2 + i*8;
+			BlockInfo_t b;
+			b.addr =  ((quint8)(pBa->at(start)) << 24) +
+				((quint8)(pBa->at(start + 1)) << 16) +
+				((quint8)(pBa->at(start + 2)) << 8) +
+				((quint8)(pBa->at(start + 3)));
+			b.size = ((quint8)(pBa->at(start + 4)) << 24) +
+				((quint8)(pBa->at(start + 5)) << 16) +
+				((quint8)(pBa->at(start + 6)) << 8) +
+				((quint8)(pBa->at(start + 7)));
+			bl.append(b);
+		}
+#ifndef F_NO_DEBUG
+		for (int i = 0; i < bl.size(); i++) {
+			qDebug() << tr("0x%1, 0x%2").arg(bl.at(i).addr, 8, 16, QChar('0')).arg(bl.at(i).size, 8, 16, QChar('0'));
+		}
+#endif
+
+	}
 }

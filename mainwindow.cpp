@@ -511,9 +511,12 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
     }
     outFile->write(ba);
     ba = HeaderFile::getBlockHeader(SECTION_INFO);
-    outFile->write(ba);
-    outFile->write(m_baAppInfo);
-    outFile->write(m_baAppBlock);
+    //outFile->write(ba);
+    //outFile->write(m_baAppInfo);
+    for (int i = 0; i < m_baAppBlocks.size(); i++) {
+        outFile->write(ba);
+        outFile->write(m_baAppBlocks.at(i));
+    }
     outFile->close();
     delete outFile;
 
@@ -603,7 +606,10 @@ bool MainWindow::saveHexFiles(QString &outMsg)
         fileNameAppHex = QString::number(v) + ".hex";
     }
     ba.clear();
-    ba = baHeader + m_baAppInfo + m_baAppBlock;
+    for (int i = 0; i < m_baAppBlocks.size(); i++) {
+        ba = baHeader;
+        ba += m_baAppBlocks.at(i);
+    }
     baseAddr = m_parameters["ADDR_APPL_SWINFO"].toULong(&ok, 16);
     IHexFile::saveFileFromByteArray(ba, fileNameAppHex, baseAddr, IHEXFILE_HEX86);
 
@@ -945,17 +951,23 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
     // read app block
     addr = m_parameters["ADDR_APPL_BLOCK"].toULong(&ok, 16);
     size = m_parameters["SIZE_APPL_BLOCK"].toInt(&ok, 16);
-    m_baAppBlock = m_pFullSrecordFile->getBinData(addr, size);
-    if (m_baAppBlock.isEmpty()) {
-        outMsg = tr("File %1 load failure: app block read error.").arg(fileName);
-        return false;
-    }
+
+    m_baAppBlocks.clear();
+    QList<BlockInfo_t> bl = m_pAppHeaderFile->appBlockInfo();
+    for (int i = 0; i < bl.size(); i++) {
+        QByteArray ba = m_pFullSrecordFile->getBinData(bl.at(i).addr, bl.at(i).size);
+        if (ba.isEmpty()) {
+            outMsg = tr("File %1 load failure: app block read error.").arg(fileName);
+            return false;
+        }
 #ifndef F_NO_DEBUG
-    {
-        QByteArray tmpBa = m_baAppBlock.mid(0, 128);
-        qDebug() << "APP_BLOCK(" << tmpBa.count() << "):" << tmpBa.toHex();
-    }
+        {
+            QByteArray tmpBa = ba.mid(0, 128);
+            qDebug() << "APP_BLOCK(" << tmpBa.count() << "):" << tmpBa.toHex();
+        }
 #endif
+        m_baAppBlocks.append(ba);
+    }
 
     outMsg = tr("File %1 loaded success.").arg(fileName);
 
