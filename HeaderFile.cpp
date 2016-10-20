@@ -12,8 +12,8 @@
 #define CH_SIGNAME_INDICATOR "@"	// signed header
 #define CH_INFNAME_INDICATOR "$"	// plain data info
 
-static const char g_dataTypeSig[] = {0x03, 0x01};
-static const char g_dataTypeInf[] = {0x01, 0x01};
+static const char g_dataTypeSigned[] = {0x03, 0x01};
+static const char g_dataTypePlain[] = {0x01, 0x01};
 
 const SecHelper_t g_appSectionMapping[HDRFILE_APP_SECTIONS] = {
 	// App Signed Header (data type 03 01)
@@ -176,7 +176,7 @@ qint32 HeaderFile::load(QString fileName)
         	int chEnd = line.indexOf(CH_INFNAME_INDICATOR, 1);
         	if (chEnd != -1) {
         		section.name = line.mid(0, chEnd+1);
-        		lastSectionType = SECTION_INFO;
+        		lastSectionType = SECTION_PLAIN;
         	}
 #if 0//ndef F_NO_DEBUG
         	qDebug() << "processing section " << section.name;
@@ -351,7 +351,7 @@ QByteArray HeaderFile::getBinData(int type, QString &msgOutput)
 	}
 
 	ba.clear();
-	ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+	ba.append(QByteArray::fromRawData(g_dataTypeSigned, sizeof(g_dataTypeSigned)));
 
 	for (int i = 0; i < arrayLen; i++)
 	{
@@ -363,7 +363,7 @@ QByteArray HeaderFile::getBinData(int type, QString &msgOutput)
 		}
 		if (pSh[i].name == "$Integrity Word$")
 		{
-			ba.append(QByteArray::fromRawData(g_dataTypeInf, sizeof(g_dataTypeInf)));
+			ba.append(QByteArray::fromRawData(g_dataTypePlain, sizeof(g_dataTypePlain)));
 		}
 		ba.append(*pBa);
 	}
@@ -386,7 +386,7 @@ QByteArray HeaderFile::getHdrBinData(int type, QString &msgOutput)
 	}
 
 	ba.clear();
-	ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+	ba.append(QByteArray::fromRawData(g_dataTypeSigned, sizeof(g_dataTypeSigned)));
 
 	for (int i = 0; i < arrayLen; i++) {
 		if(pSh[i].name.startsWith('@')) {
@@ -402,13 +402,13 @@ QByteArray HeaderFile::getHdrBinData(int type, QString &msgOutput)
 	return ba;
 }
 
-QByteArray HeaderFile::getBlockHeader(int type)
+QByteArray HeaderFile::getBlockDataType(int type)
 {
 	QByteArray ba;
 	if (type == SECTION_SIGNEDHDR) {
-		ba = QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig));
+		ba = QByteArray::fromRawData(g_dataTypeSigned, sizeof(g_dataTypeSigned));
 	} else {
-		ba = QByteArray::fromRawData(g_dataTypeInf, sizeof(g_dataTypeInf));
+		ba = QByteArray::fromRawData(g_dataTypePlain, sizeof(g_dataTypePlain));
 	}
 	return ba;
 }
@@ -418,12 +418,12 @@ QByteArray HeaderFile::getBinDataWithOutCheck()
 	QByteArray ba;
 
 	ba.clear();
-	ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+	ba.append(QByteArray::fromRawData(g_dataTypeSigned, sizeof(g_dataTypeSigned)));
 	for (int i = 0; i < m_sigSections.count(); i++)
 	{
 		ba.append(m_sigSections.at(i).data);
 	}
-	ba.append(QByteArray::fromRawData(g_dataTypeInf, sizeof(g_dataTypeInf)));
+	ba.append(QByteArray::fromRawData(g_dataTypePlain, sizeof(g_dataTypePlain)));
 	for (int i = 0; i < m_infSections.count(); i++)
 	{
 		ba.append(m_infSections.at(i).data);

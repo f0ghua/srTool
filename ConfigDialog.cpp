@@ -36,8 +36,8 @@ void ConfigDialog::loadParameters()
 {
 	ui->m_leAppInfoAddr->setText(getParameter("ADDR_APPL_SWINFO"));
 	ui->m_leAppInfoSize->setText(getParameter("SIZE_APPL_SWINFO"));
-	ui->m_leAppBlockAddr->setText(getParameter("ADDR_APPL_BLOCK"));
-	ui->m_leAppBlockSize->setText(getParameter("SIZE_APPL_BLOCK"));
+	//ui->m_leAppBlockAddr->setText(getParameter("ADDR_APPL_BLOCK"));
+	//ui->m_leAppBlockSize->setText(getParameter("SIZE_APPL_BLOCK"));
 
 	ui->m_leCal1InfoAddr->setText(getParameter("ADDR_CAL1_DATAINFO"));
 	ui->m_leCal1InfoSize->setText(getParameter("SIZE_CAL1_DATAINFO"));
@@ -71,8 +71,8 @@ void ConfigDialog::saveConfigParameters()
 
     (*m_pParameters)["ADDR_APPL_SWINFO"] = ui->m_leAppInfoAddr->text();
     (*m_pParameters)["SIZE_APPL_SWINFO"] = ui->m_leAppInfoSize->text();
-    (*m_pParameters)["ADDR_APPL_BLOCK"] = ui->m_leAppBlockAddr->text();
-    (*m_pParameters)["SIZE_APPL_BLOCK"] = ui->m_leAppBlockSize->text();
+    //(*m_pParameters)["ADDR_APPL_BLOCK"] = ui->m_leAppBlockAddr->text();
+    //(*m_pParameters)["SIZE_APPL_BLOCK"] = ui->m_leAppBlockSize->text();
 
     (*m_pParameters)["ADDR_CAL1_DATAINFO"] = ui->m_leCal1InfoAddr->text();
     (*m_pParameters)["SIZE_CAL1_DATAINFO"] = ui->m_leCal1InfoSize->text();

@@ -21,7 +21,7 @@
 #define MIN_APPINFO_SIZE			76
 #define MIN_CALINFO_SIZE			14
 #define SECTION_SIGNEDHDR			0
-#define SECTION_INFO				1
+#define SECTION_PLAIN				1
 
 #define HDRFILE_APP_SECTIONS		30
 #define HDRFILE_CAL_SECTIONS		17
@@ -74,7 +74,7 @@ public:
 	qint32 loadInfoSection(const QByteArray &ba);
 	QList<BlockInfo_t> appBlockInfo() {return m_appBlockInfo;}
 
-    static QByteArray getBlockHeader(int type);
+    static QByteArray getBlockDataType(int type);
 	static bool appSWLInfoValidator(const QString fileName, const HFileSection_t *pSc, QString &msgOutput);
 
 	QString m_fileName;

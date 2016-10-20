@@ -510,7 +510,7 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         return false;
     }
     outFile->write(ba);
-    ba = HeaderFile::getBlockHeader(SECTION_INFO);
+    ba = HeaderFile::getBlockDataType(SECTION_PLAIN);
     //outFile->write(ba);
     //outFile->write(m_baAppInfo);
     for (int i = 0; i < m_baAppBlocks.size(); i++) {
@@ -542,7 +542,7 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         return false;
     }
     outFile->write(ba);
-    ba = HeaderFile::getBlockHeader(SECTION_INFO);
+    ba = HeaderFile::getBlockDataType(SECTION_PLAIN);
     outFile->write(ba);
     outFile->write(m_baCal1Info);
     outFile->write(m_baCal1Block);
@@ -571,7 +571,7 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         return false;
     }
     outFile->write(ba);
-    ba = HeaderFile::getBlockHeader(SECTION_INFO);
+    ba = HeaderFile::getBlockDataType(SECTION_PLAIN);
     outFile->write(ba);
     outFile->write(m_baCal2Info);
     outFile->write(m_baCal2Block);
@@ -597,7 +597,7 @@ bool MainWindow::saveHexFiles(QString &outMsg)
     }
 
     if (m_parameters["HEX_HEADER_ENABLE"].toInt(&ok, 16)) {
-        baHeader = HeaderFile::getBlockHeader(SECTION_INFO);
+        baHeader = HeaderFile::getBlockDataType(SECTION_PLAIN);
     }
 
     QString fileNameAppHex("APP.hex");
@@ -949,8 +949,8 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 #endif
 
     // read app block
-    addr = m_parameters["ADDR_APPL_BLOCK"].toULong(&ok, 16);
-    size = m_parameters["SIZE_APPL_BLOCK"].toInt(&ok, 16);
+    //addr = m_parameters["ADDR_APPL_BLOCK"].toULong(&ok, 16);
+    //size = m_parameters["SIZE_APPL_BLOCK"].toInt(&ok, 16);
 
     m_baAppBlocks.clear();
     QList<BlockInfo_t> bl = m_pAppHeaderFile->appBlockInfo();
