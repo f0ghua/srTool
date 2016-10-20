@@ -89,7 +89,7 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Block Address:</string>
+                   <string>Data Address:</string>
                   </property>
                  </widget>
                 </item>
@@ -183,7 +183,7 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Block Address:</string>
+                   <string>Data Address:</string>
                   </property>
                  </widget>
                 </item>
