@@ -6,7 +6,7 @@ const QPair<QString, QString> g_configParamsList[] = {
     {"ADDR_APPL_SWINFO", "0x00010000"},
     {"SIZE_APPL_SWINFO", "0x200"},
     {"ADDR_APPL_BLOCK", "0x00010200"},
-    {"SIZE_APPL_BLOCK", "0xCFFF8"},
+    {"SIZE_APPL_BLOCK", "0xCFDF8"},
     {"ADDR_CAL1_DATAINFO", "0x00008000"},
     {"SIZE_CAL1_DATAINFO", "0x20"},
     {"ADDR_CAL1_BLOCK", "0x00008020"},

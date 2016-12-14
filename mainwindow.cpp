@@ -890,7 +890,7 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 #ifndef F_NO_DEBUG
     //qDebug() << "CAL1_INFO(" << ba.count() << "):" << ba.toHex();
 #endif
-    m_pCal1HeaderFile->loadInfoSection(m_baCal1Info);
+    //m_pCal1HeaderFile->loadInfoSection(m_baCal1Info);
 
     // read cal2 info header
     addr = m_parameters["ADDR_CAL2_DATAINFO"].toULong(&ok, 16);
@@ -903,7 +903,7 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 #ifndef F_NO_DEBUG
     //qDebug() << "CAL2_INFO(" << ba.count() << "):" << ba.toHex();
 #endif
-    m_pCal2HeaderFile->loadInfoSection(m_baCal2Info);
+    //m_pCal2HeaderFile->loadInfoSection(m_baCal2Info);
 
     // read app info header
     addr = m_parameters["ADDR_APPL_SWINFO"].toULong(&ok, 16);
@@ -916,7 +916,7 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 #ifndef F_NO_DEBUG
     qDebug() << "APP_INFO(" << m_baAppInfo.count() << "):" << m_baAppInfo.toHex();
 #endif
-    m_pAppHeaderFile->loadInfoSection(m_baAppInfo);
+    //m_pAppHeaderFile->loadInfoSection(m_baAppInfo);
 
     // read cal2 block
     addr = m_parameters["ADDR_CAL2_BLOCK"].toULong(&ok, 16);
