@@ -214,7 +214,8 @@ qint32 HeaderFile::loadInfoSection(const QByteArray &ba)
 {
     const SecHelper_t *arrayMapping;
     int arrayLen;
-
+	int paddingLen = 0;
+	
     if (m_fileType == HDRFILE_TYPE_APP) {
         arrayMapping = &g_appSectionMapping[0];
         arrayLen = HDRFILE_APP_SECTIONS;
@@ -223,8 +224,10 @@ qint32 HeaderFile::loadInfoSection(const QByteArray &ba)
         arrayLen = HDRFILE_CAL_SECTIONS;
     }
 
+#ifdef USE_FULLFILE_INFO
     QList<HFileSection_t> &linfSections = this->m_infSections;
     linfSections.clear();
+#endif
 
     int pos = 0;
     for (int i = 0; i < arrayLen; i++) {
@@ -243,7 +246,7 @@ qint32 HeaderFile::loadInfoSection(const QByteArray &ba)
                 section.data = ba.mid(pos, pSh->len);
                 pos += pSh->len;
             }
-
+#ifdef USE_FULLFILE_INFO
             linfSections.append(section);
 
             if (!pSh->syncName.isEmpty()) {
@@ -251,13 +254,14 @@ qint32 HeaderFile::loadInfoSection(const QByteArray &ba)
             	if (pBa != NULL)
             		*pBa = section.data;
             }
+#endif
         }
     }
 
-    if (pos != ba.size())
-    	return -1;
-
-    return 0;
+	if (pos < ba.size())
+		paddingLen = ba.size() - pos;
+	
+    return paddingLen;
 }
 
 qint32 HeaderFile::save(QString fileName)
@@ -368,10 +372,41 @@ QByteArray HeaderFile::getHdrBinData(int type, QString &msgOutput)
 	}
 
 	ba.clear();
-	ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+	//ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
 
 	for (int i = 0; i < arrayLen; i++) {
 		if(pSh[i].name.startsWith('@')) {
+			QByteArray *pBa = getSectionDataByName(pSh[i].name);
+			if (pBa == NULL) {
+				msgOutput += tr("section %1 is missing\n").arg(pSh[i].name);
+				return QByteArray();
+			}
+			ba.append(*pBa);
+		}
+	}
+
+	return ba;
+}
+
+QByteArray HeaderFile::getInfoBinData(int type, QString &msgOutput)
+{
+	const SecHelper_t *pSh;
+	int arrayLen;
+	QByteArray ba;
+
+	if (type == HDRFILE_TYPE_APP) {
+		pSh = &g_appSectionMapping[0];
+		arrayLen = ARRAY_SIZE(g_appSectionMapping);
+	} else {
+		pSh = &g_calSectionMapping[0];
+		arrayLen = ARRAY_SIZE(g_calSectionMapping);
+	}
+
+	ba.clear();
+	//ba.append(QByteArray::fromRawData(g_dataTypeSig, sizeof(g_dataTypeSig)));
+
+	for (int i = 0; i < arrayLen; i++) {
+		if(pSh[i].name.startsWith('$')) {
 			QByteArray *pBa = getSectionDataByName(pSh[i].name);
 			if (pBa == NULL) {
 				msgOutput += tr("section %1 is missing\n").arg(pSh[i].name);

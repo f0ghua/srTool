@@ -62,6 +62,7 @@ public:
     QByteArray *getSectionDataByName(const QString &name);
     QByteArray getBinData(int type, QString &msgOutput);
     QByteArray getHdrBinData(int type, QString &msgOutput);
+	QByteArray getInfoBinData(int type, QString &msgOutput);
     QByteArray getBinDataWithOutCheck();
     qint64 getHexPartNumber();
 	qint32 loadInfoSection(const QByteArray &ba);

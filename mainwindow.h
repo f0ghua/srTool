@@ -80,6 +80,7 @@ private:
     BinFile *m_pCal1BinFile;
     BinFile *m_pCal2BinFile;
     QByteArray m_baAppInfo, m_baCal1Info, m_baCal2Info;
+	QByteArray m_baAppInfoPadding, m_baCal1InfoPadding, m_baCal2InfoPadding;
     QByteArray m_baAppBlock, m_baCal1Block, m_baCal2Block;
     QStandardItemModel* m_model;
 

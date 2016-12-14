@@ -483,21 +483,14 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 	QString msg;
 	QFile *outFile;
 	qint64 v;
-	QByteArray ba;
+	QByteArray ba, headerBa;
 
     if (m_baAppInfo.isEmpty()) {
         outMsg = tr("Please load the full content S19 file first.");
         return false;
     }
 
-    msg.clear();
-    ba = m_pAppHeaderFile->getHdrBinData(HDRFILE_TYPE_APP, msg);
-    if (ba.isEmpty())
-    {
-    	outMsg = tr("Header file %1 save binary wrong: ").arg(m_pAppHeaderFile->m_fileName);
-    	outMsg += msg;
-        return false;
-    }
+	// contract app file ----------------------------------------------------
     QString fileNameAppBin("APP.bin");
     if ((v = m_pAppHeaderFile->getHexPartNumber()) != -1)
     {
@@ -509,24 +502,42 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         delete outFile;
         return false;
     }
+
+    ba = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
+    outFile->write(ba);
+    msg.clear();
+    ba = m_pAppHeaderFile->getHdrBinData(HDRFILE_TYPE_APP, msg);
+    if (ba.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get header binary wrong: ").arg(m_pAppHeaderFile->m_fileName);
+    	outMsg += msg;
+		outFile->close();
+		delete outFile;
+        return false;
+    }
     outFile->write(ba);
     ba = HeaderFile::getBlockHeader(SECTION_INFO);
     outFile->write(ba);
-    outFile->write(m_baAppInfo);
+    msg.clear();
+    ba = m_pAppHeaderFile->getInfoBinData(HDRFILE_TYPE_APP, msg);
+    if (ba.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get info binary wrong: ").arg(m_pAppHeaderFile->m_fileName);
+    	outMsg += msg;
+		outFile->close();
+		delete outFile;
+        return false;
+    }
+	outFile->write(ba);
+    outFile->write(m_baAppInfoPadding);
     outFile->write(m_baAppBlock);
     outFile->close();
     delete outFile;
 
     qInfo() << tr("Binary file %1 generated successfully.").arg(fileNameAppBin);
 
-    msg.clear();
-    ba = m_pCal1HeaderFile->getHdrBinData(HDRFILE_TYPE_CAL, msg);
-    if (ba.isEmpty())
-    {
-        outMsg = tr("Header file %1 save binary wrong: ").arg(m_pCal1HeaderFile->m_fileName);
-        outMsg += msg;
-        return false;
-    }
+	// contract cal1 file ----------------------------------------------------
+
     QString fileNameCal1Bin("CAL1.bin");
     if ((v = m_pCal1HeaderFile->getHexPartNumber()) != -1)
     {
@@ -538,24 +549,42 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         delete outFile;
         return false;
     }
+	
+    ba = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
+    outFile->write(ba);
+    msg.clear();
+    ba = m_pCal1HeaderFile->getHdrBinData(HDRFILE_TYPE_CAL, msg);
+    if (ba.isEmpty())
+    {
+        outMsg = tr("Header file %1 get header binary wrong: ").arg(m_pCal1HeaderFile->m_fileName);
+        outMsg += msg;
+		outFile->close();
+		delete outFile;
+        return false;
+    }
     outFile->write(ba);
     ba = HeaderFile::getBlockHeader(SECTION_INFO);
     outFile->write(ba);
-    outFile->write(m_baCal1Info);
+    msg.clear();
+    ba = m_pCal1HeaderFile->getInfoBinData(HDRFILE_TYPE_CAL, msg);
+    if (ba.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get info binary wrong: ").arg(m_pCal1HeaderFile->m_fileName);
+    	outMsg += msg;
+		outFile->close();
+		delete outFile;
+        return false;
+    }
+	outFile->write(ba);
+    outFile->write(m_baCal1InfoPadding);
     outFile->write(m_baCal1Block);
     outFile->close();
     delete outFile;
 
     qInfo() << tr("Binary file %1 generated successfully.").arg(fileNameCal1Bin);
 
-    msg.clear();
-    ba = m_pCal2HeaderFile->getHdrBinData(HDRFILE_TYPE_CAL, msg);
-    if (ba.isEmpty())
-    {
-        outMsg = tr("Header file %1 save binary wrong: ").arg(m_pCal2HeaderFile->m_fileName);
-        outMsg += msg;
-        return false;
-    }
+	// contract cal2 file ----------------------------------------------------
+
     QString fileNameCal2Bin("CAL2.bin");
     if ((v = m_pCal2HeaderFile->getHexPartNumber()) != -1)
     {
@@ -567,10 +596,34 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         delete outFile;
         return false;
     }
+	
+    ba = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
+    outFile->write(ba);
+    msg.clear();
+    ba = m_pCal2HeaderFile->getHdrBinData(HDRFILE_TYPE_CAL, msg);
+    if (ba.isEmpty())
+    {
+        outMsg = tr("Header file %1 get header binary wrong: ").arg(m_pCal2HeaderFile->m_fileName);
+        outMsg += msg;
+		outFile->close();
+		delete outFile;
+        return false;
+    }
     outFile->write(ba);
     ba = HeaderFile::getBlockHeader(SECTION_INFO);
     outFile->write(ba);
-    outFile->write(m_baCal2Info);
+    msg.clear();
+    ba = m_pCal2HeaderFile->getInfoBinData(HDRFILE_TYPE_CAL, msg);
+    if (ba.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get info binary wrong: ").arg(m_pCal1HeaderFile->m_fileName);
+    	outMsg += msg;
+		outFile->close();
+		delete outFile;
+        return false;
+    }
+	outFile->write(ba);
+    outFile->write(m_baCal2InfoPadding);
     outFile->write(m_baCal2Block);
     outFile->close();
     delete outFile;
@@ -583,11 +636,12 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 
 bool MainWindow::saveHexFiles(QString &outMsg)
 {
-    QByteArray ba, baHeader;
+    QByteArray ba, baHeader, baInfo;
     qint64 v;
     quint32 baseAddr;
     bool ok;
-
+	QString msg;
+	
     if (m_baAppInfo.isEmpty()) {
         outMsg = tr("Please load the full content S19 file first.");
         return false;
@@ -603,7 +657,16 @@ bool MainWindow::saveHexFiles(QString &outMsg)
         fileNameAppHex = QString::number(v) + ".hex";
     }
     ba.clear();
-    ba = baHeader + m_baAppInfo + m_baAppBlock;
+    msg.clear();
+    baInfo = m_pAppHeaderFile->getInfoBinData(HDRFILE_TYPE_APP, msg);
+    if (baInfo.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get info binary wrong: ").arg(m_pAppHeaderFile->m_fileName);
+    	outMsg += msg;
+        return false;
+    }
+	ba = baHeader + baInfo + m_baAppInfoPadding + m_baAppBlock;
+
     baseAddr = m_parameters["ADDR_APPL_SWINFO"].toULong(&ok, 16);
     IHexFile::saveFileFromByteArray(ba, fileNameAppHex, baseAddr, IHEXFILE_HEX86);
 
@@ -614,8 +677,18 @@ bool MainWindow::saveHexFiles(QString &outMsg)
     {
         fileNameCal1Hex = QString::number(v) + ".hex";
     }
+
     ba.clear();
-    ba = baHeader + m_baCal1Info + m_baCal1Block;
+    msg.clear();
+    baInfo = m_pCal1HeaderFile->getInfoBinData(HDRFILE_TYPE_CAL, msg);
+    if (baInfo.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get info binary wrong: ").arg(m_pCal1HeaderFile->m_fileName);
+    	outMsg += msg;
+        return false;
+    }
+	ba = baHeader + baInfo + m_baCal1InfoPadding + m_baCal1Block;
+	
     baseAddr = m_parameters["ADDR_CAL1_DATAINFO"].toULong(&ok, 16);
     IHexFile::saveFileFromByteArray(ba, fileNameCal1Hex, baseAddr, IHEXFILE_HEX86);
 
@@ -625,9 +698,18 @@ bool MainWindow::saveHexFiles(QString &outMsg)
     if ((v = m_pCal2HeaderFile->getHexPartNumber()) != -1)
     {
         fileNameCal2Hex = QString::number(v) + ".hex";
-    }
+    }	
     ba.clear();
-    ba = baHeader + m_baCal2Info + m_baCal2Block;
+    msg.clear();
+    baInfo = m_pCal2HeaderFile->getInfoBinData(HDRFILE_TYPE_CAL, msg);
+    if (baInfo.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get info binary wrong: ").arg(m_pCal2HeaderFile->m_fileName);
+    	outMsg += msg;
+        return false;
+    }
+	ba = baHeader + baInfo + m_baCal2InfoPadding + m_baCal2Block;
+
     baseAddr = m_parameters["ADDR_CAL2_DATAINFO"].toULong(&ok, 16);
     IHexFile::saveFileFromByteArray(ba, fileNameCal2Hex, baseAddr, IHEXFILE_HEX86);
 
@@ -873,7 +955,8 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
     quint32 addr;
     int size;
     QFileInfo fi(fileName);
-
+	int padLen= 0;
+	
     if (m_pFullSrecordFile->load(fileName) == -1)
     {
         outMsg = tr("File %1 load failure.").arg(fileName);
@@ -890,7 +973,8 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 #ifndef F_NO_DEBUG
     //qDebug() << "CAL1_INFO(" << ba.count() << "):" << ba.toHex();
 #endif
-    //m_pCal1HeaderFile->loadInfoSection(m_baCal1Info);
+    padLen = m_pCal1HeaderFile->loadInfoSection(m_baCal1Info);
+	m_baCal1InfoPadding = m_baCal1Info.right(padLen);
 
     // read cal2 info header
     addr = m_parameters["ADDR_CAL2_DATAINFO"].toULong(&ok, 16);
@@ -903,7 +987,8 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 #ifndef F_NO_DEBUG
     //qDebug() << "CAL2_INFO(" << ba.count() << "):" << ba.toHex();
 #endif
-    //m_pCal2HeaderFile->loadInfoSection(m_baCal2Info);
+    padLen = m_pCal2HeaderFile->loadInfoSection(m_baCal2Info);
+	m_baCal2InfoPadding = m_baCal2Info.right(padLen);
 
     // read app info header
     addr = m_parameters["ADDR_APPL_SWINFO"].toULong(&ok, 16);
@@ -916,8 +1001,9 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 #ifndef F_NO_DEBUG
     qDebug() << "APP_INFO(" << m_baAppInfo.count() << "):" << m_baAppInfo.toHex();
 #endif
-    //m_pAppHeaderFile->loadInfoSection(m_baAppInfo);
-
+    padLen = m_pAppHeaderFile->loadInfoSection(m_baAppInfo);
+	m_baAppInfoPadding = m_baAppInfo.right(padLen);
+		
     // read cal2 block
     addr = m_parameters["ADDR_CAL2_BLOCK"].toULong(&ok, 16);
     size = m_parameters["SIZE_CAL2_BLOCK"].toInt(&ok, 16);
