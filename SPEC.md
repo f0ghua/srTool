@@ -1,4 +1,12 @@
 
+# Requirement 20161214
+
+1. 程序启动，自动载入三个头文件XXXHeaderForGeneration.txt，读取HEADER段和INFO段的内容并显示于界面；
+2. 用户点击"Load Full Content S19 File"，载入文件full.s19，读取INFO段， BLOCK段的信息；原HEADER段和INFO段内容及界面均不更新，保持原txt文件中读取的内容；
+3. 用户点击"Save Binaries", 将HEADER段，INFO段，BLOCK段合并生成相应的BIN文件和HEX文件.
+4.1 用户通过界面修改HEADER/INFO段信息，然后点击"Save Headers"保存到XXXHeaderForGeneration.txt；
+4.2 用户点击"Save Binaries", 将HEADER段，INFO段，BLOCK段合并生成相应的BIN文件和HEX文件.
+
 # Requirement 20161010
 
 文件格式有4种
