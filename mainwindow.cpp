@@ -723,6 +723,7 @@ bool MainWindow::saveHexFiles(QString &outMsg)
 
 int MainWindow::loadS19File(SrecFile *pSrecordFile)
 {
+	Q_UNUSED(pSrecordFile);
     return 0;
 }
 
@@ -1095,6 +1096,9 @@ void MainWindow::on_actionExtract_App_Header_triggered()
 
     pHeaderFile->save(FILENAME_EXTRACT_HDR_APP);
 
+	delete pBinFile;
+	delete pHeaderFile;
+
     statusBar()->showMessage(tr("APPL header has saved to %1.").arg(FILENAME_EXTRACT_HDR_APP), 2000);
 }
 
@@ -1122,6 +1126,9 @@ void MainWindow::on_actionExtract_Cal1_Header_triggered()
     }
 
     pHeaderFile->save(FILENAME_EXTRACT_HDR_CAL1);
+    
+	delete pBinFile;
+	delete pHeaderFile;
 
     statusBar()->showMessage(tr("CAL1 header has saved to %1.").arg(FILENAME_EXTRACT_HDR_CAL1), 2000);
 }
@@ -1151,6 +1158,9 @@ void MainWindow::on_actionExtract_Cal2_Header_triggered()
 
     pHeaderFile->save(FILENAME_EXTRACT_HDR_CAL2);
 
+	delete pBinFile;
+	delete pHeaderFile;
+	
     statusBar()->showMessage(tr("CAL2 header has saved to %1.").arg(FILENAME_EXTRACT_HDR_CAL2), 2000);
 }
 
@@ -1159,3 +1169,78 @@ void MainWindow::on_actionPreferences_triggered()
     m_configDialog = new ConfigDialog(&m_parameters, this);
     m_configDialog->show();
 }
+
+void MainWindow::on_actionMergeFiles(QString &hexFileName, QString &binFileName, int type)
+{
+	QByteArray ba;
+	QString msg, outMsg;
+	
+    QFileInfo fiHex(hexFileName);
+    QString ext = fiHex.suffix();
+    if (ext.toLower() != "hex") {
+        messageBoxAlert("File type is wrong, please select a right file to process.");
+        return;
+    }
+
+    QFileInfo fiBin(binFileName);
+    ext = fiBin.suffix();
+    if (ext.toLower() != "bin") {
+        messageBoxAlert("File type is wrong, please select a right file to process.");
+        return;
+    }
+
+	QString outFileName = fiBin.baseName() + "_hex.bin";
+	QFile *outFile = new QFile(outFileName);
+	if (!outFile->open(QIODevice::WriteOnly))
+	{
+		delete outFile;
+		return;
+	}
+
+    HeaderFile HeaderFile(type);
+    BinFile BinFile(&HeaderFile, NULL);
+    if (BinFile.load(binFileName, type) == -1)
+    {
+        messageBoxAlert(tr("File %1 load failure.").arg(binFileName));
+        outFile->close();
+        delete outFile;
+        return;
+    }
+    
+    ba = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
+    outFile->write(ba);
+    msg.clear();
+    ba = HeaderFile.getHdrBinData(type, msg);
+    if (ba.isEmpty())
+    {
+    	outMsg = tr("Header file %1 get header binary wrong: ").arg(HeaderFile.m_fileName);
+    	outMsg += msg;
+    	messageBoxAlert(msg);
+		outFile->close();
+		delete outFile;
+        return;
+    }
+    outFile->write(ba);
+
+ 	ba = HeaderFile.getBlockHeader(SECTION_INFO);
+ 	// if hex file with HEX_HEADER_ENABLE, we should remove it 
+ 	if ((ba.count() >= 2) && (ba.at(0) == 1) && (ba.at(1) == 1))
+ 		ba.remove(0, 2);
+ 	outFile->write(ba);
+
+	ba = IHexFile::decode(hexFileName);
+    if (ba.isEmpty())
+    {
+    	outMsg = tr("Hex file %1 decord error").arg(HeaderFile.m_fileName);
+    	messageBoxAlert(msg);
+		outFile->close();
+		delete outFile;
+        return;
+    }
+
+	outFile->write(ba);
+
+	outFile->close();
+    delete outFile;	
+}
+

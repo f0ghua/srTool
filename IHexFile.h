@@ -19,7 +19,8 @@ public:
     explicit IHexFile(QObject *parent = 0);
 	static int saveFileFromByteArray(QByteArray &data, QString &fileName,
 		quint32 baseAddr = 0, int type = IHEXFILE_HEX386);
-
+	static QByteArray decode(QString &hexFileName);
+	
 	bool segmentAddrRecord;
 	bool linearAddrRecord;
 	QMap<quint32, QByteArray> blocks;

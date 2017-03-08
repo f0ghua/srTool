@@ -1,7 +1,7 @@
 #include "AboutDialog.h"
 
 #define APP_NAME 	"Motorola S19 Split Tool"
-#define APP_VERSION	"1.2.04"
+#define APP_VERSION	"1.2.05"
 
 extern double g_dpiScaleValue;
 

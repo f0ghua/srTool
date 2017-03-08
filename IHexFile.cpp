@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QDebug>
 
 IHexFile::IHexFile(QObject *parent) :
 	QObject(parent),
@@ -123,4 +124,72 @@ int IHexFile::saveFileFromByteArray(QByteArray &data, QString &fileName,
 	delete outFile;
 
 	return 0;
+}
+
+QByteArray IHexFile::decode(QString &hexFileName)
+{
+    QFile *inFile = new QFile(hexFileName);
+    QString line;
+	QByteArray binArray = QByteArray();
+	quint32 linearAddress;
+	quint32 loadOffset = 0;
+	quint8 blockSize;
+	quint8 recordType;
+	quint8 checksum = 0;
+	int lineCounter = 0;
+	int blockLen = 0;
+	
+    if (!inFile->open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        delete inFile;
+        return binArray;
+    }
+
+	while (!inFile->atEnd()) {
+		line = QString(inFile->readLine().simplified());
+		checksum = 0;
+		lineCounter++;
+		
+		if (!line.isEmpty()) {
+			if (!line.startsWith(':')) {
+				if (lineCounter == 1) {
+					// it's not a intel hex file
+					break;
+				} else {
+					// just dump warning and continue
+					continue;
+				}
+			}
+
+			line.remove(0, 1);
+			QByteArray ba = QByteArray::fromHex(line.toLatin1());
+			for (int i = 0; i < ba.count(); i++) {
+				checksum += static_cast<quint8>(ba.at(i));
+			}
+
+			if (checksum != 0) {
+				qWarning() << QObject::tr("checksum is error at line %1").arg(lineCounter);
+				continue;
+			}
+
+			blockSize = ba.at(0);
+			loadOffset = static_cast<quint8>(ba.at(1)) << 8 + static_cast<quint8>(ba.at(2));
+			recordType = ba.at(3);
+
+			switch (recordType) {
+				case 0: // data record
+				{
+					int len = ba.count() - 4 - 1;
+					QByteArray data = ba.mid(4, len);
+					binArray.append(data);
+
+					break;
+				}
+				default:
+					break;
+			}
+		}
+	}
+
+	return binArray;
 }

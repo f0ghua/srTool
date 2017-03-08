@@ -35,6 +35,9 @@ public:
     bool saveBinaryFiles(QString &outMsg);
     bool saveHexFiles(QString &outMsg);
 
+public slots:
+	void on_actionMergeFiles(QString &hexFileName, QString &binFileName, int type);
+
 private slots:
     void on_m_pbClose_clicked();
     void on_m_pbSaveHdr_clicked();
@@ -47,7 +50,6 @@ private slots:
     void on_actionExtract_App_Header_triggered();
     void on_actionExtract_Cal1_Header_triggered();
     void on_actionExtract_Cal2_Header_triggered();
-
     void on_actionPreferences_triggered();
 
 private:
