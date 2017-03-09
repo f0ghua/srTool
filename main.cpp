@@ -99,7 +99,7 @@ static int mainConsole(QApplication &a, MainWindow &w, int argc, char *argv[])
 	Q_UNUSED(argv);
 	
     QCoreApplication::setApplicationName("srTool");
-    QCoreApplication::setApplicationVersion("1.2.05");
+    QCoreApplication::setApplicationVersion("1.2.06");
     
     QCommandLineParser parser;
     parser.setApplicationDescription("Motorola S19 Split Tool");

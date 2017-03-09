@@ -1222,11 +1222,8 @@ void MainWindow::on_actionMergeFiles(QString &hexFileName, QString &binFileName,
     }
     outFile->write(ba);
 
- 	ba = pHeaderFile->getBlockHeader(SECTION_INFO);
- 	// if hex file with HEX_HEADER_ENABLE, we should remove it 
- 	if ((ba.count() >= 2) && (ba.at(0) == 1) && (ba.at(1) == 1))
- 		ba.remove(0, 2);
- 	outFile->write(ba);
+    ba = HeaderFile::getBlockHeader(SECTION_INFO);
+    outFile->write(ba);
 
 	ba = IHexFile::decode(hexFileName);
     if (ba.isEmpty())
@@ -1237,6 +1234,9 @@ void MainWindow::on_actionMergeFiles(QString &hexFileName, QString &binFileName,
 		delete outFile;
         return;
     }
+ 	// if hex file with HEX_HEADER_ENABLE, we should remove it 
+ 	if ((ba.count() >= 2) && (ba.at(0) == 1) && (ba.at(1) == 1))
+ 		ba.remove(0, 2);
 
 	outFile->write(ba);
 
@@ -1303,11 +1303,8 @@ void MainWindow::on_actionMergeHexHdrFiles(QString &hexFileName, QString &hdrFil
     }
     outFile->write(ba);
 
- 	ba = pHeaderFile->getBlockHeader(SECTION_INFO);
- 	// if hex file with HEX_HEADER_ENABLE, we should remove it 
- 	if ((ba.count() >= 2) && (ba.at(0) == 1) && (ba.at(1) == 1))
- 		ba.remove(0, 2);
- 	outFile->write(ba);
+    ba = HeaderFile::getBlockHeader(SECTION_INFO);
+    outFile->write(ba);
 
 	ba = IHexFile::decode(hexFileName);
     if (ba.isEmpty())
@@ -1318,7 +1315,9 @@ void MainWindow::on_actionMergeHexHdrFiles(QString &hexFileName, QString &hdrFil
 		delete outFile;
         return;
     }
-
+ 	// if hex file with HEX_HEADER_ENABLE, we should remove it 
+ 	if ((ba.count() >= 2) && (ba.at(0) == 1) && (ba.at(1) == 1))
+ 		ba.remove(0, 2);
 	outFile->write(ba);
 
 	outFile->close();
