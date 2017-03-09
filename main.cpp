@@ -105,38 +105,72 @@ static int mainConsole(QApplication &a, MainWindow &w, int argc, char *argv[])
     parser.setApplicationDescription("Motorola S19 Split Tool");
     parser.addHelpOption();
     parser.addVersionOption();
-    QCommandLineOption splitePtpFileOption(QStringList() << "f" << "ptpfile",
-            QCoreApplication::translate("main", "indicate <ptpfile> to split to hex and bin files."),
+    QCommandLineOption ptpFileOption(QStringList() << "f" << "ptpfile",
+            QCoreApplication::translate("main", "indicate ptp file which include all data"),
             QCoreApplication::translate("main", "ptpfile"));
-    QCommandLineOption appBinFileOption(QStringList() << "a" << "appbinfile",
-            QCoreApplication::translate("main", "indicate <app binfile> to be merged"),
+    QCommandLineOption appFileOption(QStringList() << "a" << "appbinfile",
+            QCoreApplication::translate("main", "indicate application binary(.bin)/header(.txt) file"),
             QCoreApplication::translate("main", "appbinfile"));
-    QCommandLineOption calBinFileOption(QStringList() << "c" << "calbinfile",
-            QCoreApplication::translate("main", "indicate <cal binfile> to be merged"),
+    QCommandLineOption calFileOption(QStringList() << "c" << "calbinfile",
+            QCoreApplication::translate("main", "indicate calibration binary(.bin)/header(.txt) file"),
             QCoreApplication::translate("main", "calbinfile"));
     QCommandLineOption hexFileOption(QStringList() << "x" << "hexfile",
-            QCoreApplication::translate("main", "indicate <hexfile> to be merged"),
+            QCoreApplication::translate("main", "indicate intel hex format file"),
             QCoreApplication::translate("main", "hexfile"));
+            
+    QCommandLineOption spliteFileOption(QStringList() << "s" << "split",
+            QCoreApplication::translate("main", "split ptp file to hex and bin files"));
+    QCommandLineOption mergeFileOption(QStringList() << "m" << "merge",
+            QCoreApplication::translate("main", "merge hex file content with header extract from bin/header file"));
 
-    parser.addOption(splitePtpFileOption);
+    parser.addOption(ptpFileOption);
     parser.addOption(hexFileOption);
-    parser.addOption(appBinFileOption);
-    parser.addOption(calBinFileOption);
+    parser.addOption(appFileOption);
+    parser.addOption(calFileOption);
+    
+    parser.addOption(spliteFileOption);
+    parser.addOption(mergeFileOption);
     parser.process(a);
     
-    QStringList ptpFileNameList = parser.values(splitePtpFileOption);
-    QStringList hexFileNameList = parser.values(hexFileOption);
-    QStringList appBinFileNameList = parser.values(appBinFileOption);
-	QStringList calBinFileNameList = parser.values(calBinFileOption);
+    const QStringList ptpFileNameList = parser.values(ptpFileOption);
+    const QStringList hexFileNameList = parser.values(hexFileOption);
+    const QStringList appFileNameList = parser.values(appFileOption);
+	const QStringList calFileNameList = parser.values(calFileOption);
+	QString ptpFileName, hexFileName;
+	QString appBinFileName, calBinFileName;
+	QString appHdrFileName, calHdrFileName;
+		
+	if (!ptpFileNameList.isEmpty())
+    	ptpFileName = ptpFileNameList.at(0);
+	if (!hexFileNameList.isEmpty())
+    	hexFileName = hexFileNameList.at(0);
+
+	if (!appFileNameList.isEmpty()) {
+		QFileInfo fi(appFileNameList.at(0));
+		QString ext = fi.suffix();
+		if (ext.toLower() == "bin")
+    		appBinFileName = appFileNameList.at(0);
+    	else if (ext.toLower() == "txt")
+    		appHdrFileName = appFileNameList.at(0);
+	}
+
+	if (!calFileNameList.isEmpty()) {
+		QFileInfo fi(calFileNameList.at(0));
+		QString ext = fi.suffix();
+		if (ext.toLower() == "bin")
+    		calBinFileName = calFileNameList.at(0);
+    	else if (ext.toLower() == "txt")
+    		calHdrFileName = calFileNameList.at(0);
+	}
 	
-	if (!ptpFileNameList.isEmpty()) {
-    	QString fullFileName = ptpFileNameList.at(0);
-    	QString errMsg;
+	if (parser.isSet(spliteFileOption)) {
+		QString errMsg;
+		if (ptpFileName.isEmpty() || (!QFile::exists(ptpFileName))) {
+			qWarning() << "The ptp file has not been assigned or not exist.";
+			return -1;
+		}
 
-    	if (fullFileName.isEmpty() || (!QFile::exists(fullFileName)))
-        	return -1;
-
-    	if (!w.loadFullFile(fullFileName, errMsg)) {
+    	if (!w.loadFullFile(ptpFileName, errMsg)) {
         	qWarning() << errMsg;
         	return -1;
     	}
@@ -149,37 +183,34 @@ static int mainConsole(QApplication &a, MainWindow &w, int argc, char *argv[])
         	return -1;
     	}
 
-		return 0;
-	}
-
-
-	if (!hexFileNameList.isEmpty()) {
-		QString hexFileName = hexFileNameList.at(0);
-		if (!QFile::exists(hexFileName)) {
-			qWarning() << QObject::tr("hex file %1 doesn't exist").arg(hexFileName);
+	} else if (parser.isSet(mergeFileOption)) {
+		if (hexFileName.isEmpty() || (!QFile::exists(hexFileName))) {
+			qWarning() << "The ptp file has not been assigned or not exist.";
 			return -1;
 		}
 
-		if (!appBinFileNameList.isEmpty()) {
-			QString appBinFileName = appBinFileNameList.at(0);
-		
-			if (!QFile::exists(appBinFileName)) {
-				qWarning() << QObject::tr("bin file %1 doesn't exist").arg(appBinFileName);
-				return -1;
-			}
-
-			w.on_actionMergeFiles(hexFileName, appBinFileName, HDRFILE_TYPE_APP);
-
-		} else if (!calBinFileNameList.isEmpty()) {
-			QString calBinFileName = calBinFileNameList.at(0);
-
-			if (!QFile::exists(calBinFileName)) {
-				qWarning() << QObject::tr("bin file %1 doesn't exist").arg(calBinFileName);
-				return -1;
-			}
-		
-			w.on_actionMergeFiles(hexFileName, calBinFileName, HDRFILE_TYPE_CAL);
+		if (!appHdrFileName.isEmpty() && QFile::exists(appHdrFileName)) {
+			w.on_actionMergeHexHdrFiles(hexFileName, appHdrFileName, HDRFILE_TYPE_APP);
+			return 0;
 		}
+
+		if (!calHdrFileName.isEmpty() && QFile::exists(calHdrFileName)) {
+			w.on_actionMergeHexHdrFiles(hexFileName, calHdrFileName, HDRFILE_TYPE_CAL);
+			return 0;
+		}
+
+		if (!appBinFileName.isEmpty() && QFile::exists(appBinFileName)) {
+			w.on_actionMergeFiles(hexFileName, appBinFileName, HDRFILE_TYPE_APP);
+			return 0;
+		}
+
+		if (!calBinFileName.isEmpty() && QFile::exists(calBinFileName)) {
+			w.on_actionMergeFiles(hexFileName, calBinFileName, HDRFILE_TYPE_CAL);
+			return 0;
+		}
+	} else {
+		qWarning() << "You must set -s or -m for function use";
+		return -1;
 	}
 	
     return 0;

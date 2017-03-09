@@ -3,6 +3,9 @@
 #define APP_NAME 	"Motorola S19 Split Tool"
 #define APP_VERSION	"1.2.05"
 
+static const QDate g_buildDate = QLocale( QLocale::C ).toDate( QString( __DATE__ ), "MMM  d yyyy");
+static const QTime g_buildTime = QTime::fromString( __TIME__, "hh:mm:ss" );
+
 extern double g_dpiScaleValue;
 
 /**
@@ -54,8 +57,8 @@ AboutDialog::AboutDialog(QWidget *parent) :
 	m_labelBasicInfo->setText(tr(
 		"<h3><b>%1</b></h3>"
 		"<p style='color:blue'>Version %2</p>"
-		"<p style='color:blue'>Release Date: %3<p>"
-		).arg(APP_NAME).arg(APP_VERSION).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+		"<p style='color:blue'>Release Date: %3 %4<p>"
+		).arg(APP_NAME).arg(APP_VERSION).arg(g_buildDate.toString("yyyy-MM-dd")).arg(g_buildTime.toString("hh:mm:ss"))
 		);
 	m_gridLayout->addWidget(m_labelBasicInfo);
 

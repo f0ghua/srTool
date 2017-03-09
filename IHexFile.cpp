@@ -126,6 +126,7 @@ int IHexFile::saveFileFromByteArray(QByteArray &data, QString &fileName,
 	return 0;
 }
 
+// reference to https://github.com/codinghead/Intel-HEX-Class/blob/master/intelhex_class/intelhexclass.cpp
 QByteArray IHexFile::decode(QString &hexFileName)
 {
     QFile *inFile = new QFile(hexFileName);
@@ -173,7 +174,7 @@ QByteArray IHexFile::decode(QString &hexFileName)
 			}
 
 			blockSize = ba.at(0);
-			loadOffset = static_cast<quint8>(ba.at(1)) << 8 + static_cast<quint8>(ba.at(2));
+			loadOffset = (static_cast<quint8>(ba.at(1)) << 8) + static_cast<quint8>(ba.at(2));
 			recordType = ba.at(3);
 
 			switch (recordType) {

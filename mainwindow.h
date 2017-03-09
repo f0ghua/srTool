@@ -37,7 +37,8 @@ public:
 
 public slots:
 	void on_actionMergeFiles(QString &hexFileName, QString &binFileName, int type);
-
+	void on_actionMergeHexHdrFiles(QString &hexFileName, QString &hdrFileName, int type);
+	
 private slots:
     void on_m_pbClose_clicked();
     void on_m_pbSaveHdr_clicked();
