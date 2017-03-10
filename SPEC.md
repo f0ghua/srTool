@@ -1,4 +1,20 @@
 
+# Requirement 20170310
+
+面板里更新CCID的同时，还要更新AppHeaderForGeneration里面的下面两段信息
+
+$P1.Cal Module Info 1$------------------------------------------
+
+$P2.Cal Module Info 1$------------------------------------------
+
+面板设置为Cal1的CCID为80 00，则$P1.Cal Module Info 1$------------------------------------------ 的第3/4 字节为80 00
+
+面板设置为Cal2的CCID为80 01，则$P2.Cal Module Info 1$------------------------------------------ 的第3/4 字节为80 01
+
+# Requirement 20170308
+
+通过命令行，可以合并hex文件和bin文件，把hex文件的内容转成bin，同时把输入的bin文件的singed header添加到生成的bin文件中。
+
 # Requirement 20161214
 
 1. 程序启动，自动载入三个头文件XXXHeaderForGeneration.txt，读取HEADER段和INFO段的内容并显示于界面；
@@ -25,32 +41,32 @@ http://www.dlwrr.com/electronics/tools/hexview/hexview.html
 > 包含除Header以外的所有信息,由地址索引
 ```
 0x00000000  CAL2_DATAINFO, length = 0x20
-…   
-0x0000001F  
-0x00000020  CAL2_BLOCK, length = 0x7FD8   
-…   
-0x00007FF7  
-0x00007FF8  CAL2_PSI, length = 0x8               
-…   
-0x00007FFF  
+…
+0x0000001F
+0x00000020  CAL2_BLOCK, length = 0x7FD8
+…
+0x00007FF7
+0x00007FF8  CAL2_PSI, length = 0x8
+…
+0x00007FFF
 0x00008000  CAL1_DATAINFO, length = 0x20
-…   
-0x0000801F  
-0x00008020  CAL1_BLOCK, length = 0x3FD8   
-…   
-0x0000BFF7  
-0x0000BFF8  CAL1_PSI, length = 0x8               
-…   
-0x0000BFFF  
+…
+0x0000801F
+0x00008020  CAL1_BLOCK, length = 0x3FD8
+…
+0x0000BFF7
+0x0000BFF8  CAL1_PSI, length = 0x8
+…
+0x0000BFFF
 0x00010000  APPL_SWINFO, length = 0x200
-…   
-0x000101FF  
-0x00010200  APPL_BLOCK, length = 0xCFFF8 
-…   
-0x000DFFF7  
-0x000DFFF8  APPL_PSI, length = 0x8               
-…   
-0x000DFFFF  
+…
+0x000101FF
+0x00010200  APPL_BLOCK, length = 0xCFFF8
+…
+0x000DFFF7
+0x000DFFF8  APPL_PSI, length = 0x8
+…
+0x000DFFFF
 ```
 
 - AppHeaderForGeneration.txt
@@ -92,4 +108,4 @@ http://www.dlwrr.com/electronics/tools/hexview/hexview.html
 - txt文件命名APP.txt, CAL1.txt, CAL2.txt
 - 支持命令行操作
 - 从binay读取txt
-    + load binary file, 
+    + load binary file,

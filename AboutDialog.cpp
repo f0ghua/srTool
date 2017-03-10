@@ -1,7 +1,7 @@
 #include "AboutDialog.h"
 
 #define APP_NAME 	"Motorola S19 Split Tool"
-#define APP_VERSION	"1.2.06"
+#define APP_VERSION	"1.2.07"
 
 static const QDate g_buildDate = QLocale( QLocale::C ).toDate( QString( __DATE__ ), "MMM  d yyyy");
 static const QTime g_buildTime = QTime::fromString( __TIME__, "hh:mm:ss" );

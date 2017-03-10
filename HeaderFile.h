@@ -69,7 +69,8 @@ public:
 
     static QByteArray getBlockHeader(int type);
 	static bool appSWLInfoValidator(const QString fileName, const HFileSection_t *pSc, QString &msgOutput);
-
+	static int updateAppCalInfosByCalCCID(HeaderFile *appHdr, HeaderFile *cal1Hdr, HeaderFile *cal2Hdr);
+	
 	QString m_fileName;
 	int m_fileType;
     QList<HFileSection_t> m_sigSections;

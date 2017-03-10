@@ -849,6 +849,12 @@ void MainWindow::on_m_pbSaveHdr_clicked()
     updateCal1HeaderFile();
     updateCal2HeaderFile();
 
+    // as requirement at 20170310, we should also update byte 3 and byte 4 of
+    // P1.Cal Module Info as CCID value.
+
+    HeaderFile::updateAppCalInfosByCalCCID(m_pAppHeaderFile, m_pCal1HeaderFile, 
+		m_pCal2HeaderFile);
+
     if (m_pAppHeaderFile->save(FILENAME_APP_SIGNED_HEADER) != 0)
     {
     	msg += tr("File %1 saved failure.\n").arg(FILENAME_APP_SIGNED_HEADER);

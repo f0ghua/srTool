@@ -484,6 +484,45 @@ QByteArray *HeaderFile::getSectionDataByName(const QString &name)
 	return NULL;
 }
 
+int HeaderFile::updateAppCalInfosByCalCCID(HeaderFile *appHdr, HeaderFile *cal1Hdr, HeaderFile *cal2Hdr)
+{
+	Q_ASSERT(appHdr != NULL);
+	
+	QByteArray *pBaAppCal1Info;
+    pBaAppCal1Info = appHdr->getSectionDataByName("$P1.Cal Module Info 1$");
+    if (pBaAppCal1Info->count() != 12)
+    	return -1;
+
+	QByteArray *pBaAppCal2Info;
+    pBaAppCal2Info = appHdr->getSectionDataByName("$P2.Cal Module Info 1$");
+    if (pBaAppCal2Info->count() != 12)
+    	return -1;
+
+	if (cal1Hdr) {
+		QByteArray *pBaCal1CCID;
+    	pBaCal1CCID = cal1Hdr->getSectionDataByName("$CCID$");
+    	if (pBaCal1CCID->count() != 2)
+    		return -1;	
+    	
+		(*pBaAppCal1Info)[2] = pBaCal1CCID->at(0);
+		(*pBaAppCal1Info)[3] = pBaCal1CCID->at(1);
+	}
+
+	if (cal2Hdr) {
+		QByteArray *pBaCal2CCID;
+    	pBaCal2CCID = cal2Hdr->getSectionDataByName("$CCID$");
+   	 	if (pBaCal2CCID->count() != 2)
+    		return -1;	
+    		
+		(*pBaAppCal2Info)[2] = pBaCal2CCID->at(0);
+		(*pBaAppCal2Info)[3] = pBaCal2CCID->at(1);
+
+	}
+
+	return 0;
+}
+
+
 static const SecHelper_t *getValidator(const SecHelper_t *pSv,
 		int len, QString name)
 {
