@@ -32,7 +32,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
 	this->setFont(font);
 
 	setWindowModality(Qt::NonModal);
-	resize(400, 300);
+    resize(400, 340);
 	setWindowTitle(tr("About"));
 	setWindowIcon(QIcon(":iconToolAbout"));
 	m_gridLayout = new QGridLayout(this);
