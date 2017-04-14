@@ -478,13 +478,56 @@ bool MainWindow::copyFileToPath(QString sourceDir ,QString toDir, bool coverFile
     return true;
 }
 
+static quint16 doChecksum(const QByteArray &ba, int start, int size)
+{
+    quint16 sum = 0;
+
+    for (int i = start; i < (start + size);) {
+        quint16 v = (((quint8)ba.at(i)) << 8) + (quint8)ba.at(i + 1);
+        sum += v;
+        i += 2;
+    }
+    
+    return (~sum + 1); 
+}
+
+#define CHKSUM_APP_DATALEN      0x000CFFF6
+#define CHKSUM_CAL1_DATALEN     0x000B7FF6
+#define CHKSUM_CAL2_DATALEN     0x0007FFF6
+
+int MainWindow::updateIntegrityWordAsChecksum(QByteArray &ba, quint32 chksumOffset, 
+    quint32 startOffset, quint32 computeLen)
+{
+    if (chksumOffset > (quint32)(ba.count() - 1))
+        return -1;
+        
+    quint32 totalLen = startOffset + computeLen;
+    if ((quint32)ba.count() < totalLen) {
+        return -1;
+    }
+
+    quint16 chhksum = doChecksum(ba, startOffset, computeLen);
+    ba[chksumOffset] = (chhksum >> 8) & 0xFF;
+    ba[chksumOffset+1] = chhksum & 0xFF;
+    
+#ifndef F_NO_DEBUG
+    qDebug() << QObject::tr("offset = %1, chhksum = %2, start = %3, size = %4").\
+        arg(chksumOffset, 4, 16, QChar('0')).\
+        arg(chhksum, 2, 16, QChar('0')).\
+        arg(startOffset, 4, 16, QChar('0')).\
+        arg(computeLen, 4, 16, QChar('0'));
+#endif
+}
+
 bool MainWindow::saveBinaryFiles(QString &outMsg)
 {
 	QString msg;
 	QFile *outFile;
 	qint64 v;
-	QByteArray ba, headerBa;
-
+	QByteArray writeData, ba, headerBa;
+    quint32 IntegrityWordOffset = 0;
+    quint32 cksumStartOffset = 0;
+    
     if (m_baAppInfo.isEmpty()) {
         outMsg = tr("Please load the full content S19 file first.");
         return false;
@@ -503,8 +546,8 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         return false;
     }
 
-    ba = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
-    outFile->write(ba);
+    writeData = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
+    
     msg.clear();
     ba = m_pAppHeaderFile->getHdrBinData(HDRFILE_TYPE_APP, msg);
     if (ba.isEmpty())
@@ -515,9 +558,12 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 		delete outFile;
         return false;
     }
-    outFile->write(ba);
-    ba = HeaderFile::getBlockHeader(SECTION_INFO);
-    outFile->write(ba);
+    writeData += ba;
+    writeData += HeaderFile::getBlockHeader(SECTION_INFO);
+
+    IntegrityWordOffset = writeData.count();
+    IntegrityWordOffset += m_pAppHeaderFile->getOffsetOfSection(SECTION_INFO, "$Integrity Word$");
+    
     msg.clear();
     ba = m_pAppHeaderFile->getInfoBinData(HDRFILE_TYPE_APP, msg);
     if (ba.isEmpty())
@@ -528,9 +574,16 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 		delete outFile;
         return false;
     }
-	outFile->write(ba);
-    outFile->write(m_baAppInfoPadding);
-    outFile->write(m_baAppBlock);
+    writeData += ba;
+
+    writeData += m_baAppInfoPadding;
+    writeData += m_baAppBlock;
+
+    cksumStartOffset = IntegrityWordOffset + 2;
+    updateIntegrityWordAsChecksum(writeData, IntegrityWordOffset, 
+        cksumStartOffset, (writeData.count() - cksumStartOffset));
+    
+    outFile->write(writeData);
     outFile->close();
     delete outFile;
 
@@ -550,8 +603,8 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         return false;
     }
 	
-    ba = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
-    outFile->write(ba);
+    writeData = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
+    
     msg.clear();
     ba = m_pCal1HeaderFile->getHdrBinData(HDRFILE_TYPE_CAL, msg);
     if (ba.isEmpty())
@@ -562,9 +615,12 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 		delete outFile;
         return false;
     }
-    outFile->write(ba);
-    ba = HeaderFile::getBlockHeader(SECTION_INFO);
-    outFile->write(ba);
+    writeData += ba;
+    writeData += HeaderFile::getBlockHeader(SECTION_INFO);
+    
+    IntegrityWordOffset = writeData.count();
+    IntegrityWordOffset += m_pCal1HeaderFile->getOffsetOfSection(SECTION_INFO, "$Integrity Word$");
+    
     msg.clear();
     ba = m_pCal1HeaderFile->getInfoBinData(HDRFILE_TYPE_CAL, msg);
     if (ba.isEmpty())
@@ -575,9 +631,15 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 		delete outFile;
         return false;
     }
-	outFile->write(ba);
-    outFile->write(m_baCal1InfoPadding);
-    outFile->write(m_baCal1Block);
+    writeData += ba;
+    writeData += m_baCal1InfoPadding;
+    writeData += m_baCal1Block;
+
+    cksumStartOffset = IntegrityWordOffset + 2;
+    updateIntegrityWordAsChecksum(writeData, IntegrityWordOffset, 
+        cksumStartOffset, (writeData.count() - cksumStartOffset));
+
+    outFile->write(writeData);
     outFile->close();
     delete outFile;
 
@@ -597,8 +659,8 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
         return false;
     }
 	
-    ba = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
-    outFile->write(ba);
+    writeData = HeaderFile::getBlockHeader(SECTION_SIGNEDHDR);
+
     msg.clear();
     ba = m_pCal2HeaderFile->getHdrBinData(HDRFILE_TYPE_CAL, msg);
     if (ba.isEmpty())
@@ -609,9 +671,12 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 		delete outFile;
         return false;
     }
-    outFile->write(ba);
-    ba = HeaderFile::getBlockHeader(SECTION_INFO);
-    outFile->write(ba);
+    writeData += ba;
+    writeData += HeaderFile::getBlockHeader(SECTION_INFO);
+
+    IntegrityWordOffset = writeData.count();
+    IntegrityWordOffset += m_pCal1HeaderFile->getOffsetOfSection(SECTION_INFO, "$Integrity Word$");
+
     msg.clear();
     ba = m_pCal2HeaderFile->getInfoBinData(HDRFILE_TYPE_CAL, msg);
     if (ba.isEmpty())
@@ -622,9 +687,16 @@ bool MainWindow::saveBinaryFiles(QString &outMsg)
 		delete outFile;
         return false;
     }
-	outFile->write(ba);
-    outFile->write(m_baCal2InfoPadding);
-    outFile->write(m_baCal2Block);
+    writeData += ba;
+    
+    writeData += m_baCal2InfoPadding;
+    writeData += m_baCal2Block;
+    
+    cksumStartOffset = IntegrityWordOffset + 2;
+    updateIntegrityWordAsChecksum(writeData, IntegrityWordOffset, 
+        cksumStartOffset, (writeData.count() - cksumStartOffset));
+
+    outFile->write(writeData);
     outFile->close();
     delete outFile;
 
@@ -969,7 +1041,7 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
         outMsg = tr("File %1 load failure.").arg(fileName);
         return false;
     }
-
+    
     addr = m_parameters["ADDR_CAL1_DATAINFO"].toULong(&ok, 16);
     size = m_parameters["SIZE_CAL1_DATAINFO"].toInt(&ok, 16);
     m_baCal1Info = m_pFullSrecordFile->getBinData(addr, size);
@@ -1058,7 +1130,7 @@ bool MainWindow::loadFullFile(const QString &fileName, QString &outMsg)
 void MainWindow::on_actionLoad_S19_File_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open"), QString(), tr("Motorola S-record Files (*.s19);;Binary Files (*.bin);;All Files (*.*)"));
+        tr("Open"), QString(), tr("Motorola S-record Files (*.s19 *.ptp);;Binary Files (*.bin);;All Files (*.*)"));
 
     if (fileName.isEmpty())
         return;

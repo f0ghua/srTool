@@ -1,3 +1,23 @@
+# Requirement 20170413
+
+SrTool需要增加一个计算checksum的功能，具体描述如下：
+
+APP/CAL1/CAL2用于生成bin文件的txt头文件里面Integrity Word两个字节用APP/CAL1/CAL2的checksum来代替
+》 只需要处理bin文件
+》 保存头文件的时候不需要修改Integrity Word的值
+
+Checksum 计算方法和计算范围如下
+
+计算方法：每两个字节求和，不考虑进位，最后求补码。比如APP的所有字节求和值为55，那么最终的checksum = FF – 55 + 1 = AB
+=》字节序高位在前，低位在后
+
+APP:
+Start address: 0x0010002 End address: 0x000DFFF7
+CAL1:
+Start address: 0x0008002 End address: 0x000BFFF7
+CAL2:
+Start address: 0x0000002 End address: 0x0007FFF7
+其实就是计算从Integrity Word的后面开始到文件结尾的数据的checksum，然后把值存储到Integrity Word中。
 
 # Requirement 20170310
 

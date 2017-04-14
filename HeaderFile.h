@@ -66,7 +66,9 @@ public:
     QByteArray getBinDataWithOutCheck();
     qint64 getHexPartNumber();
 	qint32 loadInfoSection(const QByteArray &ba);
-
+    int updateIntegrityWordByChecksum(quint16 checksum);
+    int getOffsetOfSection(int type, const QString &name);
+    
     static QByteArray getBlockHeader(int type);
 	static bool appSWLInfoValidator(const QString fileName, const HFileSection_t *pSc, QString &msgOutput);
 	static int updateAppCalInfosByCalCCID(HeaderFile *appHdr, HeaderFile *cal1Hdr, HeaderFile *cal2Hdr);

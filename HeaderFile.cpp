@@ -357,6 +357,38 @@ QByteArray HeaderFile::getBinData(int type, QString &msgOutput)
 	return ba;
 }
 
+int HeaderFile::getOffsetOfSection(int type, const QString &name)
+{
+    int offset = 0;
+    bool isFound = false;
+    
+    if (type == SECTION_SIGNEDHDR) {
+        for (int i = 0; i < m_sigSections.count(); i++) {
+            if (m_sigSections.at(i).name != name) {
+                offset += m_sigSections.at(i).data.count();
+            } else {
+                isFound = true;
+                break;
+            }
+        }
+    } else {
+        for (int i = 0; i < m_infSections.count(); i++) {
+            if (m_infSections.at(i).name != name) {
+                offset += m_infSections.at(i).data.count();
+            } else {
+                isFound = true;
+                break;
+            }
+        }
+    }
+    
+    if (isFound) {
+        return (offset);
+    }
+    
+    return -1;
+}
+
 QByteArray HeaderFile::getHdrBinData(int type, QString &msgOutput)
 {
 	const SecHelper_t *pSh;
@@ -490,9 +522,10 @@ int HeaderFile::updateAppCalInfosByCalCCID(HeaderFile *appHdr, HeaderFile *cal1H
 	
 	QByteArray *pBaAppCal1Info;
     pBaAppCal1Info = appHdr->getSectionDataByName("$P1.Cal Module Info 1$");
-    if (pBaAppCal1Info->count() != 12)
+    if (pBaAppCal1Info->count() != 12) {
     	return -1;
-
+    }
+    
 	QByteArray *pBaAppCal2Info;
     pBaAppCal2Info = appHdr->getSectionDataByName("$P2.Cal Module Info 1$");
     if (pBaAppCal2Info->count() != 12)
@@ -522,6 +555,18 @@ int HeaderFile::updateAppCalInfosByCalCCID(HeaderFile *appHdr, HeaderFile *cal1H
 	return 0;
 }
 
+int HeaderFile::updateIntegrityWordByChecksum(quint16 checksum)
+{	
+	QByteArray *pBaIntegrityWord;
+    pBaIntegrityWord = getSectionDataByName("$Integrity Word$");
+    if (pBaIntegrityWord == NULL)
+    	return -1;
+
+    (*pBaIntegrityWord)[0] = (checksum>>8) & 0xFF;
+    (*pBaIntegrityWord)[1] = checksum & 0xFF;
+
+	return 0;
+}
 
 static const SecHelper_t *getValidator(const SecHelper_t *pSv,
 		int len, QString name)

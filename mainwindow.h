@@ -101,6 +101,8 @@ private:
     void messageBoxAlert(QString s);
     void updateTableView();
     void readConfigSettings();
+    int updateIntegrityWordAsChecksum(QByteArray &ba, quint32 chksumOffset, 
+        quint32 startOffset, quint32 computeLen);
 };
 
 #endif // MAINWINDOW_H
